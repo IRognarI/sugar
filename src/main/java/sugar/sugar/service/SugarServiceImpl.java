@@ -1,14 +1,20 @@
 package sugar.sugar.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sugar.sugar.dto.NewSugar;
 import sugar.sugar.interfaces.SugarService;
 import sugar.sugar.model.Sugar;
+import sugar.sugar.repository.SugarRepository;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
+@Slf4j
 public class SugarServiceImpl implements SugarService {
+    private final SugarRepository sugarRepository;
     @Override
     public Sugar addEntry(NewSugar newSugar) {
         return null;

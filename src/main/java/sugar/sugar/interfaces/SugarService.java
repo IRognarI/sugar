@@ -1,14 +1,16 @@
 package sugar.sugar.interfaces;
 
 import sugar.sugar.dto.NewSugar;
+import sugar.sugar.dto.SugarDto;
+import sugar.sugar.dto.UpdateSugar;
 import sugar.sugar.model.Sugar;
 
 public interface SugarService {
-    Sugar addEntry(NewSugar newSugar);
+    SugarDto addEntry(NewSugar newSugar);
 
-    Sugar updateEntry(String note, double doseOfInsulin);
+    Sugar updateEntry(UpdateSugar updateSugar);
 
-    Sugar getSugarById(Long sugarId);
+    SugarDto getSugarById(Long sugarId);
 
     void removeSugarById(Long sugarId);
 

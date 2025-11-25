@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import sugar.sugar.model.Sugar;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SugarRepository extends JpaRepository<Sugar, Long> {
     @Query("""
@@ -15,4 +16,6 @@ public interface SugarRepository extends JpaRepository<Sugar, Long> {
             and s.id <> :id
             """)
     List<Sugar> findByLevelSugar(@Param(value = "levelSugar") double levelSugar, @Param(value = "id") Long id);
+
+    Optional<Sugar> getSugarById(Long id);
 }

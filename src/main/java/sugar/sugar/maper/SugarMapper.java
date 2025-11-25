@@ -36,7 +36,7 @@ public class SugarMapper {
         sugarDto.setLevelSugar(sugar.getLevelSugar());
         sugarDto.setDoseOfInsulin(sugar.getDoseOfInsulin());
         sugarDto.setTime(DateTimeFormat.dateTimeToString(sugar.getTime()));
-        sugarDto.setNote(sugarDto.getNote());
+        sugarDto.setNote(sugar.getNote());
 
         return sugarDto;
     }

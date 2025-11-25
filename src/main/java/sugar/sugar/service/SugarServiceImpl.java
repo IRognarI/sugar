@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import sugar.sugar.dto.NewSugar;
 import sugar.sugar.dto.SugarDto;
 import sugar.sugar.dto.UpdateSugar;
+import sugar.sugar.exception.NotFoundException;
 import sugar.sugar.exception.ValidationException;
 import sugar.sugar.interfaces.SugarService;
 import sugar.sugar.maper.SugarMapper;
@@ -45,7 +46,7 @@ public class SugarServiceImpl implements SugarService {
 
         Sugar sugarSave = sugarRepository.save(sugar);
 
-        Optional<Sugar> sugarStory = findDateTimeMax(sugarRepository.findByLevelSugar(sugarSave.getLevelSugar(), sugarSave.getId()));
+        Optional<Sugar> sugarStory = getSugarStory(sugarSave);
         SugarDto sugarDto = SugarMapper.toDto(sugarSave, sugarStory);
 
         log.info("Вернули объект: {}", sugarDto);
@@ -54,13 +55,36 @@ public class SugarServiceImpl implements SugarService {
     }
 
     @Override
-    public Sugar updateEntry(UpdateSugar updateSugar) {
+    public SugarDto updateEntry(@Valid UpdateSugar updateSugar) {
         if (updateSugar == null) {
             throw new ValidationException("Не достаточно данных для обновления");
         }
         log.info("Полученные данные для обновления: " + updateSugar);
 
-        return null;
+        Sugar sugarOld = sugarRepository.getSugarById(updateSugar.getSugarId())
+                .orElseThrow(() -> new NotFoundException("Запись с ID " + updateSugar.getSugarId() + " - не найдена"));
+
+        if (updateSugar.getNote() != null) {
+            sugarOld.setNote(updateSugar.getNote());
+        }
+
+        if (updateSugar.getSugarLevel() != 0) {
+            sugarOld.setLevelSugar(updateSugar.getSugarLevel());
+        }
+
+        if (updateSugar.getDoseOfInsulin() != 0) {
+            sugarOld.setDoseOfInsulin(updateSugar.getDoseOfInsulin());
+        }
+
+        Sugar newSugar = sugarRepository.save(sugarOld);
+
+        Optional<Sugar> sugarStory = getSugarStory(newSugar);
+
+        SugarDto sugarDto = SugarMapper.toDto(newSugar, sugarStory);
+
+        log.info("Обновленная запись {}", sugarDto);
+
+        return sugarDto;
     }
 
     @Override
@@ -97,5 +121,9 @@ public class SugarServiceImpl implements SugarService {
             }
         }
         return dateTimeMax;
+    }
+
+    private Optional<Sugar> getSugarStory(Sugar sugarSave) {
+        return findDateTimeMax(sugarRepository.findByLevelSugar(sugarSave.getLevelSugar(), sugarSave.getId()));
     }
 }

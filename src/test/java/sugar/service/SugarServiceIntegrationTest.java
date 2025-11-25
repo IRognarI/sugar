@@ -12,6 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import sugar.sugar.dto.NewSugar;
 import sugar.sugar.dto.SugarDto;
+import sugar.sugar.dto.UpdateSugar;
+import sugar.sugar.exception.ValidationException;
 import sugar.sugar.interfaces.SugarService;
 import sugar.sugar.model.Sugar;
 import sugar.sugar.repository.SugarRepository;
@@ -131,5 +133,59 @@ public class SugarServiceIntegrationTest {
 
         Assertions.assertNotNull(sugarDto, "SugarDto is Null");
         Assertions.assertEquals(sugar4.getId(), sugarDto.getId());
+    }
+
+    @Test
+    public void updateEntry_shouldBeCorrect() {
+        Sugar sugar = sugarRepository.save(sugar1.toBuilder().id(null).build());
+
+        UpdateSugar updateSugar = new UpdateSugar(sugar.getId(), "Заметка для новой записи", 1.5, 12.1);
+
+        SugarDto newSugar = sugarService.updateEntry(updateSugar);
+
+        Assertions.assertEquals(newSugar.getSugarId(), sugar.getId());
+        Assertions.assertEquals(updateSugar.getNote(), newSugar.getNote());
+        Assertions.assertEquals(newSugar.getDoseOfInsulin(), updateSugar.getDoseOfInsulin());
+        Assertions.assertEquals(newSugar.getLevelSugar(), updateSugar.getSugarLevel());
+    }
+
+    @Test
+    public void updateSugar_shouldBeValidationException_WhenUpdateSugarIsNull() {
+        UpdateSugar updateSugar = null;
+
+        ValidationException thrown = Assertions.assertThrows(ValidationException.class,
+                () -> sugarService.updateEntry(updateSugar));
+
+        System.out.println(thrown.getMessage());
+    }
+
+    @Test
+    public void updateSugar_shouldBeConstraintViolationException_WhenSugarIdIsLessOrEqualToZero() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+
+        UpdateSugar updateSugar = new UpdateSugar(0L, "Заметка для новой записи", 1.5, 12.1);
+
+        Set<ConstraintViolation<UpdateSugar>> violations = validator.validate(updateSugar);
+
+        Assertions.assertFalse(violations.isEmpty());
+
+        violations.stream().map(ConstraintViolation::getMessage).forEach(System.out::println);
+    }
+
+    @Test
+    public void updateSugar_shouldBeConstraintViolationException_WhenSugarNoteIsMoreThan255Characters() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+
+        Sugar sugar = sugarRepository.save(sugar1.toBuilder().id(null).build());
+
+        UpdateSugar updateSugar = new UpdateSugar(sugar.getId(), "Заметка для новой записи".repeat(220), 1.5, 12.1);
+
+        Set<ConstraintViolation<UpdateSugar>> violations = validator.validate(updateSugar);
+
+        Assertions.assertFalse(violations.isEmpty());
+
+        violations.stream().map(ConstraintViolation::getMessage).forEach(System.out::println);
     }
 }

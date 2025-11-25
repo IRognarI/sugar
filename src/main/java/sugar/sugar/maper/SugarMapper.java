@@ -6,31 +6,32 @@ import sugar.sugar.model.Sugar;
 import sugar.sugar.util.dateTimeFormater.DateTimeFormat;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.Optional;
 
 @UtilityClass
 public class SugarMapper {
-    public static SugarDto toDto(Sugar sugar, Long id, double lastDoseOfInsulin, LocalDateTime date) {
+    public static SugarDto toDto(Sugar sugar, Optional<Sugar> sugarStory) {
         SugarDto sugarDto = new SugarDto();
 
-        if (id > sugarDto.getId()) {
-            sugarDto.setId(id); // id последней записи в которой было найдено совпадение по уровню сахара
+        if (sugarStory.isPresent()) {
+
+            if (sugarStory.get().getId() > sugarDto.getId()) {
+                // id последней записи в которой было найдено совпадение по уровню сахара
+                sugarDto.setId(sugarStory.get().getId());
+            }
+
+            if (sugarStory.get().getDoseOfInsulin() > sugarDto.getLastDoseOfInsulin()) {
+                // доза инсулина, которая была уколота в последний раз при совпадении по уровню сахара
+                sugarDto.setLastDoseOfInsulin(sugarStory.get().getDoseOfInsulin());
+            }
+
+            int day = sugarStory.get().getTime().getDayOfMonth();
+            int month = sugarStory.get().getTime().getMonthValue();
+            int year = sugarStory.get().getTime().getYear();
+
+            sugarDto.setLastDate(DateTimeFormat.dateToString(LocalDate.of(year, month, day)));
         }
 
-        if (lastDoseOfInsulin > sugarDto.getLastDoseOfInsulin()) {
-            sugarDto.setLastDoseOfInsulin(lastDoseOfInsulin); // доза инсулина, которая была уколота в последний раз при совпадении по уровню сахара
-        }
-
-        String dateValue = "not found";
-        if (date != null) {
-            int day = date.getDayOfMonth();
-            int month = date.getMonthValue();
-            int year = date.getYear();
-
-            dateValue = DateTimeFormat.dateToString(LocalDate.of(year, month, day));
-        }
-
-        sugarDto.setLastDate(dateValue);
         sugarDto.setSugarId(sugar.getId());
         sugarDto.setLevelSugar(sugar.getLevelSugar());
         sugarDto.setDoseOfInsulin(sugar.getDoseOfInsulin());

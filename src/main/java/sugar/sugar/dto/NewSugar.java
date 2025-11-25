@@ -1,11 +1,15 @@
 package sugar.sugar.dto;
 
 import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.validator.constraints.Length;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Builder
 @ToString
@@ -14,7 +18,7 @@ public class NewSugar {
     private double sugarLevel;
 
     @Builder.Default
-    private double doseOfInsulin = 0.0;
+    private double doseOfInsulin = 0;
     @Length(max = 255, message = "Максимальное кол-во символов: 255")
     @Builder.Default
     private String note = "With out notes";

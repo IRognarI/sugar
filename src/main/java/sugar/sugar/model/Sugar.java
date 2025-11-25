@@ -24,7 +24,7 @@ import java.util.Objects;
 @ToString
 @Getter
 @Setter
-@Builder
+@Builder(toBuilder = true)
 @Entity
 @Table(name = "sugars")
 public class Sugar {
@@ -33,11 +33,11 @@ public class Sugar {
     @Setter(AccessLevel.NONE)
     private Long id;
 
-    @Builder.Default
-    private double levelSugar = 0.0;
+    @Column(nullable = false)
+    private double levelSugar;
 
     @Builder.Default
-    private double doseOfInsulin = 0.0;
+    private double doseOfInsulin = 0;
 
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime time;

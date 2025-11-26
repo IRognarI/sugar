@@ -18,4 +18,12 @@ public class DateTimeFormat {
     public static String dateToString(LocalDate date) {
         return date.format(DATE_FORMATTER);
     }
+
+    public static LocalDate dateFromString(String date) {
+        return LocalDate.parse(date, DATE_FORMATTER);
+    }
+
+    public LocalDate getDateTimeFormatter(String time) {
+        return LocalDate.parse(time, DATE_TIME_FORMATTER);
+    }
 }

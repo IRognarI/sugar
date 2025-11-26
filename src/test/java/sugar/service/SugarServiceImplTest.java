@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sugar.sugar.dto.NewSugar;
 import sugar.sugar.dto.SugarDto;
+import sugar.sugar.exception.NotFoundException;
 import sugar.sugar.exception.ValidationException;
 import sugar.sugar.model.Sugar;
 import sugar.sugar.repository.SugarRepository;
@@ -18,6 +19,7 @@ import sugar.sugar.service.SugarServiceImpl;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 public class SugarServiceImplTest {
@@ -100,5 +102,36 @@ public class SugarServiceImplTest {
         Assertions.assertEquals(0, sugarDto.getId());
         Assertions.assertEquals(0, sugarDto.getLastDoseOfInsulin());
         Assertions.assertEquals("date not found", sugarDto.getLastDate());
+    }
+
+    @Test
+    public void getSugarById_shouldBeCorrect() {
+        Mockito.when(sugarRepository.getSugarById(Mockito.anyLong())).thenReturn(Optional.of(sugarFull1));
+        Mockito.when(sugarRepository.findByLevelSugar(Mockito.anyDouble(), Mockito.anyLong())).thenReturn(List.of());
+
+        SugarDto sugarDto = sugarService.getSugarById(sugarFull1.getId());
+
+        Assertions.assertNotNull(sugarDto);
+        Assertions.assertEquals(0, sugarDto.getId());
+        Assertions.assertEquals(0, sugarDto.getLastDoseOfInsulin());
+        Assertions.assertEquals("date not found", sugarDto.getLastDate());
+    }
+
+    @Test
+    public void getSugarById_shouldBeValidationException_WhenSugarIdIsNotValid() {
+        ValidationException sugarIdIsZero = Assertions.assertThrows(ValidationException.class,
+                () -> sugarService.getSugarById(0L));
+        System.out.println(sugarIdIsZero.getMessage());
+
+        ValidationException sugarIdIsNull = Assertions.assertThrows(ValidationException.class,
+                () -> sugarService.getSugarById(null));
+        System.out.println(sugarIdIsNull.getMessage());
+    }
+
+    @Test
+    public void getSugarId_shouldBeNotFoundException_WhenSugarNotFoundById() {
+        NotFoundException thrown = Assertions.assertThrows(NotFoundException.class,
+                () -> sugarService.getSugarById(4L));
+        System.out.println(thrown.getMessage());
     }
 }

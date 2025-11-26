@@ -9,7 +9,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import sugar.sugar.dto.NewSugar;
 import sugar.sugar.dto.SugarDto;
 import sugar.sugar.dto.UpdateSugar;
@@ -25,6 +27,8 @@ import java.util.Set;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@Transactional
+@Rollback
 public class SugarServiceIntegrationTest {
 
     @Autowired
@@ -88,7 +92,7 @@ public class SugarServiceIntegrationTest {
                 .id(sugar3.getId() + 1)
                 .levelSugar(newSugar3.getSugarLevel())
                 .doseOfInsulin(sugar1.getDoseOfInsulin())
-                .time(sugar3.getTime().plusWeeks(3))
+                .time(LocalDateTime.now().minusHours(1))
                 .note(sugar1.getNote())
                 .build();
 
@@ -187,5 +191,18 @@ public class SugarServiceIntegrationTest {
         Assertions.assertFalse(violations.isEmpty());
 
         violations.stream().map(ConstraintViolation::getMessage).forEach(System.out::println);
+    }
+
+    @Test
+    public void updateSugar_partialUpdate_shouldBeCorrect() {
+        Sugar target = sugarRepository.save(sugar1.toBuilder().id(null).build());
+
+        UpdateSugar updateSugar = UpdateSugar.builder().sugarId(target.getId()).doseOfInsulin(1.5).build();
+
+        SugarDto update = sugarService.updateEntry(updateSugar);
+
+        Assertions.assertNotNull(update);
+        Assertions.assertEquals(target.getId(), update.getSugarId());
+        Assertions.assertTrue(update.getDoseOfInsulin() > 0);
     }
 }

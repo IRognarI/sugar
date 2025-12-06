@@ -9,5 +9,4 @@ class SugarApplicationTests {
     @Test
     void contextLoads() {
     }
-
 }

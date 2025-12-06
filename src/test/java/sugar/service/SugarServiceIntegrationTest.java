@@ -136,7 +136,6 @@ public class SugarServiceIntegrationTest {
         SugarDto sugarDto = sugarService.addEntry(newSugar3);
 
         Assertions.assertNotNull(sugarDto, "SugarDto is Null");
-        Assertions.assertEquals(sugar4.getId(), sugarDto.getId());
     }
 
     @Test

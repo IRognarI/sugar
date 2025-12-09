@@ -15,7 +15,6 @@ out/
 **/src/main/**/out/
 **/src/test/**/out/
 target/
-.env
 
 # Eclipse
 .apt_generated

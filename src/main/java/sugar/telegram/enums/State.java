@@ -1,0 +1,5 @@
+package sugar.telegram.enums;
+
+public enum State {
+    SUGAR, INSULIN, NOTE, REMOVE, GET_SUGAR_BY_ID, WAIT_ID_FOR_UPDATE, UPDATE_SUGAR, UPDATE_INSULIN, UPDATE_NOTE
+}

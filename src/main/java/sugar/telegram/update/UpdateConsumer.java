@@ -52,6 +52,8 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
 
                 if (userSt != null) {
 
+                    UpdateSugar sugarUpdate = new UpdateSugar();
+
                     switch (userSt.getState()) {
                         case SUGAR -> handleWriteSugar(logger.getChatId(), logger.getMessage());
 
@@ -63,10 +65,21 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
 
                         case GET_SUGAR_BY_ID -> getSugarById(logger.getChatId(), logger.getMessage());
 
-                        case WAIT_ID_FOR_UPDATE -> sugarUpdate(logger.getChatId(), logger.getMessage());
+                        case WAIT_ID_FOR_UPDATE -> sugarUpdate(logger.getChatId(), logger.getMessage(), sugarUpdate);
+
+                        case UPDATE_START -> begin(logger.getChatId(), logger.getMessage(), sugarUpdate);
+
+                        case WAIT_SUGAR_FOR_UPDATE ->
+                                handleWriteUpdateSugar(logger.getChatId(), logger.getMessage(), sugarUpdate);
+
+                        case WAIT_INSULIN_FOR_UPDATE ->
+                                handleWriteUpdateInsulin(logger.getChatId(), logger.getMessage(), sugarUpdate);
+
+                        case WAIT_NOTE_FOR_UPDATE ->
+                                handleWriteUpdateNote(logger.getChatId(), logger.getMessage(), sugarUpdate);
                     }
 
-                } else if (logger.getMessage().equals("/start")) {
+                } else if (logger.getMessage().equals("/start") || logger.getMessage().equals("/clear")) {
                     sendMenu(logger.getChatId());
 
                 } else {
@@ -81,10 +94,12 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
             String data = update.getCallbackQuery().getData();
             Long chatId = update.getCallbackQuery().getFrom().getId();
 
+            log.info("{} нажал кнопку: {}", chatId, data);
+
             switch (data) {
                 case "addEntry" -> start(chatId);
 
-                case "updateEntry" -> execute(message(chatId, "Еще учусь 🥲")); //updateStart(chatId);
+                case "updateEntry" -> updateStart(chatId);
 
                 case "getById" -> getBySugarIdStart(chatId);
 
@@ -95,38 +110,128 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
         }
     }
 
-    private void sugarUpdate(Long chatId, String message) {
+    private void handleWriteUpdateNote(Long chatId, String message, UpdateSugar sugarUpdate) {
+        UserSt userSt = userStMap.get(chatId);
+
         if (message != null && !message.isEmpty()) {
-            UpdateSugar updateSugar = new UpdateSugar();
+
+            sugarUpdate.setNote(message.trim());
+            execute(message(chatId, "Заметка добавлена"));
+            userSt.setState(State.UPDATE_START);
+            userStMap.put(chatId, userSt);
+
+        } else {
+            userSt.setState(State.UPDATE_START);
+            userStMap.put(chatId, userSt);
+        }
+    }
+
+    private void handleWriteUpdateInsulin(Long chatId, String message, UpdateSugar sugarUpdate) {
+        if (message != null && !message.isEmpty()) {
 
             UserSt userSt = userStMap.get(chatId);
 
-            if (userSt != null) {
+            try {
+                sugarUpdate.setDoseOfInsulin(Double.parseDouble(message.trim()));
+                execute(message(chatId, "Инсулин добавлен"));
+                userSt.setState(State.UPDATE_START);
+                userStMap.put(chatId, userSt);
 
-                try {
+            } catch (NumberFormatException e) {
+                execute(message(chatId, "Инсулин указывается через точку. Пример: 1.5"));
+            }
+        } else {
+            execute(message(chatId, "Укажите инсулин. Пример: 1.5"));
+        }
+    }
 
-                    switch (userSt.getState()) {
+    private void handleWriteUpdateSugar(Long chatId, String message, UpdateSugar sugarUpdate) {
+        if (message != null && !message.isEmpty()) {
 
-                        case WAIT_ID_FOR_UPDATE:
-                            updateSugar.setSugarId(Long.parseLong(message.trim()));
-                            userSt.setState(State.UPDATE_SUGAR);
-                            userStMap.put(chatId, userSt);
+            UserSt userSt = userStMap.get(chatId);
 
-                            execute(message(chatId, "ID добавлен"));
-                            break;
+            try {
+                sugarUpdate.setSugarLevel(Double.parseDouble(message.trim()));
+                execute(message(chatId, "Сахар добавлен"));
+                userSt.setState(State.UPDATE_START);
+                userStMap.put(chatId, userSt);
 
-                        case UPDATE_SUGAR:
-                            updateSugar.setSugarLevel(Double.parseDouble(message.trim()));
-                            userSt.setState(State.UPDATE_INSULIN);
-                            userStMap.put(chatId, userSt);
+            } catch (NumberFormatException e) {
+                execute(message(chatId, "Сахар указывается через точку. Пример: 7.1"));
+            }
+        } else {
+            execute(message(chatId, "Укажите сахар. Пример: 7.1"));
+        }
+    }
 
-                            execute(message(chatId, "Уровень сахара добавлен"));
-                            break;
+    private void begin(Long chatId, String message, UpdateSugar updateSugar) {
+        if (message != null && !message.isEmpty()) {
+            log.debug("Получили сообщение в begin: {}", message);
 
-                    }
-                } catch (NumberFormatException e) {
-                    execute(message(chatId, "Сахар или инсулин указывается через точку. Пример: 7.1"));
-                }
+            UserSt userSt = userStMap.get(chatId);
+
+            if (userSt == null) {
+                execute(message(chatId, "Ошибка обновления. Свяжитесь с @" + admin));
+                return;
+            }
+
+            userSt.setUpdate(updateSugar);
+
+            switch (message) {
+                case "/end":
+                    /*SugarDto sugarDto = sugarService.updateEntry(userSt.getUpdate());
+                    execute(message(chatId, String.format("Обновленная запись:%n%n%s", answerAfterSaved(sugarDto))));
+                    userStMap.remove(chatId);*/
+                    execute(message(chatId, "Данный этап в стадии разработки 🙈"));
+                    userStMap.remove(chatId);
+                    break;
+
+                case "/sugar":
+                    execute(message(chatId, "Укажите сахар"));
+                    userSt.setState(State.WAIT_SUGAR_FOR_UPDATE);
+                    userStMap.put(chatId, userSt);
+                    break;
+
+                case "/insulin":
+                    execute(message(chatId, "Укажите инсулин"));
+                    userSt.setState(State.WAIT_INSULIN_FOR_UPDATE);
+                    userStMap.put(chatId, userSt);
+                    break;
+
+                case "/note":
+                    execute(message(chatId, "Укажите заметку"));
+                    userSt.setState(State.WAIT_NOTE_FOR_UPDATE);
+                    userStMap.put(chatId, userSt);
+                    break;
+
+                default:
+                    execute(message(chatId, "Не известная команда"));
+            }
+        } else {
+            log.info("{} не отправил команду для обновления", chatId);
+            execute(message(chatId, "Отправьте команду для обновления"));
+        }
+    }
+
+    private void sugarUpdate(Long chatId, String message, UpdateSugar updateSugar) {
+        if (message != null && !message.isEmpty()) {
+
+            UserSt userSt = userStMap.get(chatId);
+
+            try {
+                SugarDto sugarDto = sugarService.getSugarById(Long.parseLong(message.trim()));
+                log.info("Получили ID= {} для обновления записи", sugarDto.getSugarId());
+
+                userSt.setUpdate(updateSugar);
+                userSt.getUpdate().setSugarId(sugarDto.getSugarId());
+
+                execute(message(chatId, "Нажмите на menu и отправьте данные для обновления. После обновления отправьте end"));
+                userSt.setState(State.UPDATE_START);
+                userStMap.put(chatId, userSt);
+
+            } catch (ValidationException | NotFoundException e) {
+                log.debug("Исключение в sugarUpdate. {}", e.getMessage());
+                execute(message(chatId, e.getMessage()));
             }
         }
     }
@@ -141,6 +246,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
         userSt.setState(State.WAIT_ID_FOR_UPDATE);
         userStMap.put(chatId, userSt);
 
+        log.info("{} начинает обновление записи", chatId);
         execute(message(chatId, "Отправьте ID записи для обновления"));
     }
 
@@ -149,6 +255,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
 
             try {
                 Long sugarId = Long.parseLong(message.trim());
+                log.info("Пользователь {} хочет получить запись с ID {}", chatId, sugarId);
 
                 try {
                     SugarDto sugarDto = sugarService.getSugarById(sugarId);
@@ -160,9 +267,11 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
                 }
 
             } catch (NumberFormatException e) {
+                log.debug("{} отправил не корректный ID записи", chatId);
                 execute(message(chatId, "Отправьте просто число. Например: 7"));
             }
         } else {
+            log.debug("{} отправил не корректное сообщение: {}", chatId, message);
             execute(message(chatId, "Отправьте ID записи, например: 7"));
         }
     }
@@ -182,6 +291,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
         if (message != null && !message.isEmpty()) {
             try {
                 Long sugarId = Long.parseLong(message.trim());
+                log.info("Передан ID для удаления: {}", sugarId);
 
                 SugarDto entryExists = null;
                 try {
@@ -189,7 +299,6 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
 
                 } catch (NotFoundException e) {
                     execute(message(chatId, e.getMessage()));
-                    userStMap.remove(chatId);
                 }
 
 
@@ -200,6 +309,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
                 }
 
             } catch (NumberFormatException e) {
+                log.debug("Указали не верный формат ID в removeById");
                 execute(message(chatId, "Укажите просто число. Пример: 7"));
             }
         }
@@ -209,6 +319,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
         UserSt userSt = userStMap.get(chatId);
 
         boolean thisIsAdmin = targetChatId.contains(chatId);
+        log.info("Для удаления записи обратился admin: {}", thisIsAdmin);
 
         if (thisIsAdmin) {
 
@@ -222,6 +333,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
             execute(message(chatId, "Отправьте ID записи, которую желаете удалить"));
 
         } else {
+            log.info("Пользователь {} хочет удалить запись", chatId);
             execute(message(chatId, "В доступе отказано. Обратитесь к @" + admin));
         }
     }
@@ -241,6 +353,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
         if (message != null && !message.isEmpty() && !message.equals(".")) {
 
             userSt.getNewSugar().setNote(message.trim());
+            log.debug("Новая заметка {}", userSt.getNewSugar().getNote());
         } else {
             execute(message(chatId, "Заметка остается по умолчанию: " + userSt.getNewSugar().getNote()));
         }
@@ -260,12 +373,14 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
             try {
                 double insulin = Double.parseDouble(message.trim());
                 userSt.getNewSugar().setDoseOfInsulin(insulin);
+                log.debug("Записали инсулин в handleWriteInsulin: {}", userSt.getNewSugar().getDoseOfInsulin());
 
                 execute(message(chatId, "Можно добавить заметку 📝. Если не нужна введите точку"));
                 userSt.setState(State.NOTE);
 
                 userStMap.put(chatId, userSt);
             } catch (NumberFormatException e) {
+                log.debug("Выброшен NumberFormatException в handleWriteInsulin");
                 execute(message(chatId, "Инсулин указывается через точку. Пример: 1.5"));
             }
 
@@ -287,16 +402,19 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
             try {
                 double sugarLevel = Double.parseDouble(message.trim());
                 userSt.getNewSugar().setSugarLevel(sugarLevel);
+                log.debug("Записали сахар в handleWriteSugar: {}", userSt.getNewSugar().getSugarLevel());
 
                 execute(message(chatId, "Укажите дозу инсулина 👇 Если указывать не нужно, отправьте точку"));
                 userSt.setState(State.INSULIN);
 
                 userStMap.put(chatId, userSt);
             } catch (NumberFormatException e) {
+                log.debug("Выброшено исключение NumberFormatException в handleWriteSugar");
                 execute(message(chatId, "Уровень сахара указывается через точку. Пример: 9.2"));
             }
 
         } else {
+            log.debug("Не указали уровень сахара");
             execute(message(chatId, "Уровень сахара должен быть указан"));
         }
     }

@@ -15,6 +15,7 @@ out/
 **/src/main/**/out/
 **/src/test/**/out/
 target/
+amplicode.xml
 
 # Eclipse
 .apt_generated

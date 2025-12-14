@@ -187,8 +187,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
                     SugarDto sugarDto = sugarService.updateEntry(updateSugar);
                     execute(message(chatId, String.format("Обновленная запись:%n%n%s", answerAfterSaved(sugarDto))));
                     userStMap.remove(chatId);
-                    //execute(message(chatId, "Данный этап в стадии разработки 🙈"));
-                    userStMap.remove(chatId);
+                    sendMenu(chatId);
                     break;
 
                 case "/sugar":
@@ -230,7 +229,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
                 userSt.setUpdate(updateSugar);
                 userSt.getUpdate().setSugarId(sugarDto.getSugarId());
 
-                execute(message(chatId, "Нажмите на menu и отправьте данные для обновления. После обновления отправьте end"));
+                execute(message(chatId, "Нажмите на \"Меню\" и отправьте данные для обновления. После обновления отправьте \"end\""));
                 userSt.setState(State.UPDATE_START);
                 userStMap.put(chatId, userSt);
 
@@ -267,6 +266,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
 
                     execute(message(chatId, answerAfterSaved(sugarDto)));
                     userStMap.remove(chatId);
+                    sendMenu(chatId);
                 } catch (ValidationException | NotFoundException e) {
                     execute(message(chatId, e.getMessage()));
                 }
@@ -311,6 +311,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
                     sugarService.removeSugarById(sugarId);
                     userStMap.remove(chatId);
                     execute(message(chatId, "Запись с ID= " + sugarId + " - была удалена"));
+                    sendMenu(chatId);
                 }
 
             } catch (NumberFormatException e) {
@@ -367,6 +368,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
         execute(message(chatId, answerAfterSaved(sugarDto)));
 
         userStMap.remove(chatId);
+        sendMenu(chatId);
     }
 
     private void handleWriteInsulin(Long chatId, String message) {

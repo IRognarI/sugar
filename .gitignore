@@ -16,6 +16,8 @@ out/
 **/src/test/**/out/
 target/
 amplicode.xml
+.env
+.env.*
 
 # Eclipse
 .apt_generated

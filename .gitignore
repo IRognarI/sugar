@@ -45,4 +45,3 @@ bin/
 # macOS
 .DS_Store.env
 logger.txt
-.env

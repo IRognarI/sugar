@@ -40,4 +40,6 @@ bin/
 .vscode/
 
 # macOS
-.DS_Store
+.DS_Store.env
+logger.txt
+.env

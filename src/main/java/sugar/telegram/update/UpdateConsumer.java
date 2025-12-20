@@ -17,10 +17,16 @@ import sugar.sugar.dto.UpdateSugar;
 import sugar.sugar.exception.NotFoundException;
 import sugar.sugar.exception.ValidationException;
 import sugar.sugar.service.SugarServiceImpl;
+import sugar.sugar.util.dateTimeFormater.DateTimeFormat;
 import sugar.telegram.enums.State;
 import sugar.telegram.loger.Logger;
 import sugar.telegram.state.UserSt;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +42,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
     private final Map<Long, UserSt> userStMap = new TreeMap<>();
     private final List<Long> targetChatId = List.of(Long.parseLong(System.getenv("my_chat_token")));
     private static final String admin = "t_visitor";
+    private static final File file = new File("logger.txt");
 
 
     @Override
@@ -46,6 +53,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
 
             if (update.getMessage().hasText()) {
                 Logger logger = new Logger(update.getMessage().getChatId(), update.getMessage().getText());
+                fileWriter(logger, file);
                 log.info("Новое сообщение: {}", logger);
 
                 UserSt userSt = userStMap.get(logger.getChatId());
@@ -106,6 +114,38 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
 
                 default -> execute(message(chatId, "Не известная команда 🤷‍♂️"));
             }
+        }
+    }
+
+    private void fileWriter(Logger logger, File file) {
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        }
+
+        boolean append = true;
+
+        long fileSize = file.length();
+        long maxSize = 262144000L;
+
+        if (fileSize > maxSize) {
+            try {
+                Files.write(file.toPath(), new byte[0]);
+                log.info("Файл logger.txt - очищен");
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        }
+
+        try (BufferedWriter writer = new BufferedWriter((new FileWriter(file, append)))) {
+
+            writer.write("{ChatId=" + logger.getChatId() + ";\n" + "Message=" + logger.getMessage() + ";\n" + "Time=" + DateTimeFormat.dateTimeToString(logger.getDateTime()) + "};\n\n");
+
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -346,11 +386,7 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
 
     private String answerAfterSaved(SugarDto sugarDto) {
 
-        return format("Предыдущая запись:%n%nID прошлой записи: %d%nДоза инсулина при сахаре: %.1f - %.2f%n" +
-                        "Последний раз, когда сахар был: %.1f - %s%n%nТекущая запись:%n%nID: %d%nСахар: %.1f%nИнсулин: %.2f%nВремя: %s%nЗаметка: %s",
-                sugarDto.getId(), sugarDto.getLevelSugar(), sugarDto.getLastDoseOfInsulin(), sugarDto.getLevelSugar(),
-                sugarDto.getLastDate(), sugarDto.getSugarId(), sugarDto.getLevelSugar(), sugarDto.getDoseOfInsulin(),
-                sugarDto.getTime(), sugarDto.getNote());
+        return format("Предыдущая запись:%n%nID прошлой записи: %d%nДоза инсулина при сахаре: %.1f - %.2f%n" + "Последний раз, когда сахар был: %.1f - %s%n%nТекущая запись:%n%nID: %d%nСахар: %.1f%nИнсулин: %.2f%nВремя: %s%nЗаметка: %s", sugarDto.getId(), sugarDto.getLevelSugar(), sugarDto.getLastDoseOfInsulin(), sugarDto.getLevelSugar(), sugarDto.getLastDate(), sugarDto.getSugarId(), sugarDto.getLevelSugar(), sugarDto.getDoseOfInsulin(), sugarDto.getTime(), sugarDto.getNote());
     }
 
     private void handleWriteNote(Long chatId, String message) {
@@ -447,41 +483,21 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
     }
 
     private SendMessage message(Long chatId, String message) {
-        return SendMessage.builder()
-                .chatId(chatId)
-                .text(message)
-                .build();
+        return SendMessage.builder().chatId(chatId).text(message).build();
     }
 
     private void sendMenu(Long chatId) {
         SendMessage sendMessage = message(chatId, "Вот что я могу:");
 
-        InlineKeyboardButton button1 = InlineKeyboardButton.builder()
-                .text("Создать запись")
-                .callbackData("addEntry")
-                .build();
+        InlineKeyboardButton button1 = InlineKeyboardButton.builder().text("Создать запись").callbackData("addEntry").build();
 
-        InlineKeyboardButton button2 = InlineKeyboardButton.builder()
-                .text("Обновить запись")
-                .callbackData("updateEntry")
-                .build();
+        InlineKeyboardButton button2 = InlineKeyboardButton.builder().text("Обновить запись").callbackData("updateEntry").build();
 
-        InlineKeyboardButton button3 = InlineKeyboardButton.builder()
-                .text("Получить запись по ID")
-                .callbackData("getById")
-                .build();
+        InlineKeyboardButton button3 = InlineKeyboardButton.builder().text("Получить запись по ID").callbackData("getById").build();
 
-        InlineKeyboardButton button4 = InlineKeyboardButton.builder()
-                .text("Удалить запись")
-                .callbackData("removeById")
-                .build();
+        InlineKeyboardButton button4 = InlineKeyboardButton.builder().text("Удалить запись").callbackData("removeById").build();
 
-        List<InlineKeyboardRow> keyboards = List.of(
-                new InlineKeyboardRow(button1),
-                new InlineKeyboardRow(button2),
-                new InlineKeyboardRow(button3),
-                new InlineKeyboardRow(button4)
-        );
+        List<InlineKeyboardRow> keyboards = List.of(new InlineKeyboardRow(button1), new InlineKeyboardRow(button2), new InlineKeyboardRow(button3), new InlineKeyboardRow(button4));
 
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(keyboards);
 

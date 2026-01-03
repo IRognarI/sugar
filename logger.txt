@@ -1,0 +1,96 @@
+{ChatId=449618914;
+Message=Роо;
+Time=03.01.2026 02:45};
+
+{ChatId=449618914;
+Message=/start;
+Time=03.01.2026 02:46};
+
+{ChatId=449618914;
+Message=Роо;
+Time=03.01.2026 02:56};
+
+{ChatId=449618914;
+Message=Дада;
+Time=03.01.2026 03:03};
+
+{ChatId=449618914;
+Message=Ррр;
+Time=03.01.2026 03:14};
+
+{ChatId=449618914;
+Message=/start;
+Time=03.01.2026 03:32};
+
+{ChatId=449618914;
+Message=Рр;
+Time=03.01.2026 03:39};
+
+{ChatId=449618914;
+Message=/sugar;
+Time=03.01.2026 03:46};
+
+{ChatId=449618914;
+Message=/insulin;
+Time=03.01.2026 03:47};
+
+{ChatId=449618914;
+Message=/note;
+Time=03.01.2026 03:47};
+
+{ChatId=449618914;
+Message=/end;
+Time=03.01.2026 03:47};
+
+{ChatId=449618914;
+Message=/help;
+Time=03.01.2026 03:47};
+
+{ChatId=449618914;
+Message=/insulin;
+Time=03.01.2026 03:47};
+
+{ChatId=449618914;
+Message=/start;
+Time=03.01.2026 03:47};
+
+{ChatId=449618914;
+Message=65;
+Time=03.01.2026 03:47};
+
+{ChatId=449618914;
+Message=Рр;
+Time=03.01.2026 03:48};
+
+{ChatId=6988695377;
+Message=Алал;
+Time=03.01.2026 12:01};
+
+{ChatId=6988695377;
+Message=Ен;
+Time=03.01.2026 12:03};
+
+{ChatId=6988695377;
+Message=/start;
+Time=03.01.2026 12:04};
+
+{ChatId=449618914;
+Message=Привет;
+Time=03.01.2026 12:08};
+
+{ChatId=449618914;
+Message=Аддадп;
+Time=03.01.2026 12:17};
+
+{ChatId=449618914;
+Message=Клкл;
+Time=03.01.2026 12:22};
+
+{ChatId=6988695377;
+Message=Прр;
+Time=03.01.2026 12:24};
+
+{ChatId=6988695377;
+Message=/start;
+Time=03.01.2026 12:26};
+

@@ -21,9 +21,23 @@ import sugar.telegram.enums.State;
 import sugar.telegram.loger.Logger;
 import sugar.telegram.state.UserSt;
 
+<<<<<<< Updated upstream
+=======
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.time.LocalTime;
+import java.util.HashSet;
+>>>>>>> Stashed changes
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 
@@ -36,6 +50,14 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
     private final Map<Long, UserSt> userStMap = new TreeMap<>();
     private final List<Long> targetChatId = List.of(Long.parseLong(System.getenv("my_chat_token")));
     private static final String admin = "t_visitor";
+<<<<<<< Updated upstream
+=======
+    private static final File file = new File("logger.txt");
+    private Set<Long> setChatId = new HashSet<>();
+    private static final LocalTime morningTime = LocalTime.of(12, 26);
+    private static final LocalTime eveningTime = LocalTime.of(20, 30);
+    private static final Long periodCheck = 60L;
+>>>>>>> Stashed changes
 
 
     @Override
@@ -46,6 +68,12 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
 
             if (update.getMessage().hasText()) {
                 Logger logger = new Logger(update.getMessage().getChatId(), update.getMessage().getText());
+<<<<<<< Updated upstream
+=======
+                setChatId.add(logger.getChatId());
+                sendNotification(update.getMessage().getFrom().getUserName());
+                fileWriter(logger, file);
+>>>>>>> Stashed changes
                 log.info("Новое сообщение: {}", logger);
 
                 UserSt userSt = userStMap.get(logger.getChatId());
@@ -109,6 +137,72 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
         }
     }
 
+<<<<<<< Updated upstream
+=======
+    private void sendNotification(String userName) {
+
+        if (!setChatId.isEmpty()) {
+            log.info("Зашли в sendNotification");
+
+            ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+
+            executorService.scheduleAtFixedRate(() -> {
+                log.info("Оказались внутри задачи");
+
+                LocalTime now = LocalTime.now();
+
+                int hour = now.getHour();
+                int minute = now.getMinute();
+
+                if ((hour == morningTime.getHour() && minute == morningTime.getMinute()) ||
+                        (hour == eveningTime.getHour() && minute == eveningTime.getMinute())) {
+
+                    for (Long id : setChatId) {
+                        log.info("Отправили сообщение пользователю: " + id);
+                        execute(message(id, userName + ", не забудьте внести запись"));
+                    }
+                }
+
+            }, 60, periodCheck, TimeUnit.SECONDS);
+
+        } else {
+            log.info("setChatId пустой");
+        }
+    }
+
+    private void fileWriter(Logger logger, File file) {
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        }
+
+        boolean append = true;
+
+        long fileSize = file.length();
+        long maxSize = 262144000L;
+
+        if (fileSize > maxSize) {
+            try {
+                Files.write(file.toPath(), new byte[0]);
+                log.info("Файл logger.txt - очищен");
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        }
+
+        try (BufferedWriter writer = new BufferedWriter((new FileWriter(file, append)))) {
+
+            writer.write("{ChatId=" + logger.getChatId() + ";\n" + "Message=" + logger.getMessage() + ";\n" + "Time=" + DateTimeFormat.dateTimeToString(logger.getDateTime()) + "};\n\n");
+
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+>>>>>>> Stashed changes
     private void handleWriteUpdateNote(Long chatId, String message) {
         UserSt userSt = userStMap.get(chatId);
 

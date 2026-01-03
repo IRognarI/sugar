@@ -17,12 +17,11 @@ import sugar.sugar.dto.UpdateSugar;
 import sugar.sugar.exception.NotFoundException;
 import sugar.sugar.exception.ValidationException;
 import sugar.sugar.service.SugarServiceImpl;
+import sugar.sugar.util.dateTimeFormater.DateTimeFormat;
 import sugar.telegram.enums.State;
 import sugar.telegram.loger.Logger;
 import sugar.telegram.state.UserSt;
 
-<<<<<<< Updated upstream
-=======
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -30,7 +29,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalTime;
 import java.util.HashSet;
->>>>>>> Stashed changes
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,15 +48,11 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
     private final Map<Long, UserSt> userStMap = new TreeMap<>();
     private final List<Long> targetChatId = List.of(Long.parseLong(System.getenv("my_chat_token")));
     private static final String admin = "t_visitor";
-<<<<<<< Updated upstream
-=======
     private static final File file = new File("logger.txt");
     private Set<Long> setChatId = new HashSet<>();
     private static final LocalTime morningTime = LocalTime.of(12, 26);
     private static final LocalTime eveningTime = LocalTime.of(20, 30);
     private static final Long periodCheck = 60L;
->>>>>>> Stashed changes
-
 
     @Override
     @SneakyThrows
@@ -68,12 +62,9 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
 
             if (update.getMessage().hasText()) {
                 Logger logger = new Logger(update.getMessage().getChatId(), update.getMessage().getText());
-<<<<<<< Updated upstream
-=======
                 setChatId.add(logger.getChatId());
                 sendNotification(update.getMessage().getFrom().getUserName());
                 fileWriter(logger, file);
->>>>>>> Stashed changes
                 log.info("Новое сообщение: {}", logger);
 
                 UserSt userSt = userStMap.get(logger.getChatId());
@@ -137,8 +128,6 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
         }
     }
 
-<<<<<<< Updated upstream
-=======
     private void sendNotification(String userName) {
 
         if (!setChatId.isEmpty()) {
@@ -202,7 +191,6 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
         }
     }
 
->>>>>>> Stashed changes
     private void handleWriteUpdateNote(Long chatId, String message) {
         UserSt userSt = userStMap.get(chatId);
 

@@ -3,7 +3,7 @@ package sugar.sugar.maper;
 import lombok.experimental.UtilityClass;
 import sugar.sugar.dto.SugarDto;
 import sugar.sugar.model.Sugar;
-import sugar.sugar.util.dateTimeFormater.DateTimeFormat;
+import sugar.sugar.dateTimeFormater.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.util.Optional;

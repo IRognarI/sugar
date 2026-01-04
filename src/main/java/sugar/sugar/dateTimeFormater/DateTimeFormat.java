@@ -1,4 +1,4 @@
-package sugar.sugar.util.dateTimeFormater;
+package sugar.sugar.dateTimeFormater;
 
 import lombok.experimental.UtilityClass;
 

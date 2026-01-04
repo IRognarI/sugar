@@ -4,38 +4,22 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardRow;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.meta.generics.TelegramClient;
 import sugar.sugar.dto.NewSugar;
 import sugar.sugar.dto.SugarDto;
 import sugar.sugar.dto.UpdateSugar;
 import sugar.sugar.exception.NotFoundException;
 import sugar.sugar.exception.ValidationException;
 import sugar.sugar.service.SugarServiceImpl;
-import sugar.sugar.util.dateTimeFormater.DateTimeFormat;
 import sugar.telegram.enums.State;
-import sugar.telegram.loger.Logger;
+import sugar.telegram.filter.CommandFilter;
 import sugar.telegram.state.UserSt;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 
@@ -43,152 +27,18 @@ import static java.lang.String.format;
 @RequiredArgsConstructor
 public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
 
-    private final TelegramClient telegramClient;
+    private final CommandFilter commandFilter;
     private final SugarServiceImpl sugarService;
     private final Map<Long, UserSt> userStMap = new TreeMap<>();
     private final List<Long> targetChatId = List.of(Long.parseLong(System.getenv("my_chat_token")));
-    private static final String admin = "t_visitor";
-    private static final File file = new File("logger.txt");
+    private static final String admin = System.getenv("admin");
     private Set<Long> setChatId = new HashSet<>();
-    private static final LocalTime morningTime = LocalTime.of(12, 26);
-    private static final LocalTime eveningTime = LocalTime.of(20, 30);
-    private static final Long periodCheck = 60L;
+
 
     @Override
     @SneakyThrows
     public void consume(Update update) {
-
-        if (update.hasMessage()) {
-
-            if (update.getMessage().hasText()) {
-                Logger logger = new Logger(update.getMessage().getChatId(), update.getMessage().getText());
-                setChatId.add(logger.getChatId());
-                sendNotification(update.getMessage().getFrom().getUserName());
-                fileWriter(logger, file);
-                log.info("Новое сообщение: {}", logger);
-
-                UserSt userSt = userStMap.get(logger.getChatId());
-
-                if (userSt != null) {
-
-                    switch (userSt.getState()) {
-                        case SUGAR -> handleWriteSugar(logger.getChatId(), logger.getMessage());
-
-                        case INSULIN -> handleWriteInsulin(logger.getChatId(), logger.getMessage());
-
-                        case NOTE -> handleWriteNote(logger.getChatId(), logger.getMessage());
-
-                        case REMOVE -> removeById(logger.getChatId(), logger.getMessage());
-
-                        case GET_SUGAR_BY_ID -> getSugarById(logger.getChatId(), logger.getMessage());
-
-                        case WAIT_ID_FOR_UPDATE -> sugarUpdate(logger.getChatId(), logger.getMessage(), userSt);
-
-                        case UPDATE_START -> begin(logger.getChatId(), logger.getMessage());
-
-                        case WAIT_SUGAR_FOR_UPDATE -> handleWriteUpdateSugar(logger.getChatId(), logger.getMessage());
-
-                        case WAIT_INSULIN_FOR_UPDATE ->
-                                handleWriteUpdateInsulin(logger.getChatId(), logger.getMessage());
-
-                        case WAIT_NOTE_FOR_UPDATE -> handleWriteUpdateNote(logger.getChatId(), logger.getMessage());
-                    }
-
-                } else if (logger.getMessage().equals("/start")) {
-                    sendMenu(logger.getChatId());
-
-                } else if (logger.getMessage().equals("/help")) {
-                    execute(message(logger.getChatId(), "Скоро здесь появится инструкция"));
-
-                } else {
-                    execute(message(logger.getChatId(), "click 👉 /start"));
-                }
-
-            } else {
-                execute(message(update.getMessage().getChatId(), "Я еще в мастерской 🥲"));
-            }
-
-        } else if (update.hasCallbackQuery()) {
-            String data = update.getCallbackQuery().getData();
-            Long chatId = update.getCallbackQuery().getFrom().getId();
-
-            log.info("{} нажал кнопку: {}", chatId, data);
-
-            switch (data) {
-                case "addEntry" -> start(chatId);
-
-                case "updateEntry" -> updateStart(chatId);
-
-                case "getById" -> getBySugarIdStart(chatId);
-
-                case "removeById" -> removeStart(chatId);
-
-                default -> execute(message(chatId, "Не известная команда 🤷‍♂️"));
-            }
-        }
-    }
-
-    private void sendNotification(String userName) {
-
-        if (!setChatId.isEmpty()) {
-            log.info("Зашли в sendNotification");
-
-            ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
-
-            executorService.scheduleAtFixedRate(() -> {
-                log.info("Оказались внутри задачи");
-
-                LocalTime now = LocalTime.now();
-
-                int hour = now.getHour();
-                int minute = now.getMinute();
-
-                if ((hour == morningTime.getHour() && minute == morningTime.getMinute()) ||
-                        (hour == eveningTime.getHour() && minute == eveningTime.getMinute())) {
-
-                    for (Long id : setChatId) {
-                        log.info("Отправили сообщение пользователю: " + id);
-                        execute(message(id, userName + ", не забудьте внести запись"));
-                    }
-                }
-
-            }, 60, periodCheck, TimeUnit.SECONDS);
-
-        } else {
-            log.info("setChatId пустой");
-        }
-    }
-
-    private void fileWriter(Logger logger, File file) {
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                throw new RuntimeException(e.getMessage());
-            }
-        }
-
-        boolean append = true;
-
-        long fileSize = file.length();
-        long maxSize = 262144000L;
-
-        if (fileSize > maxSize) {
-            try {
-                Files.write(file.toPath(), new byte[0]);
-                log.info("Файл logger.txt - очищен");
-            } catch (IOException e) {
-                throw new RuntimeException(e.getMessage());
-            }
-        }
-
-        try (BufferedWriter writer = new BufferedWriter((new FileWriter(file, append)))) {
-
-            writer.write("{ChatId=" + logger.getChatId() + ";\n" + "Message=" + logger.getMessage() + ";\n" + "Time=" + DateTimeFormat.dateTimeToString(logger.getDateTime()) + "};\n\n");
-
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
-        }
+        commandFilter.command(update);
     }
 
     private void handleWriteUpdateNote(Long chatId, String message) {
@@ -518,57 +368,5 @@ public class UpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
         userSt.setState(State.SUGAR);
 
         userStMap.put(chatId, userSt);
-    }
-
-    private void execute(SendMessage message) {
-        try {
-            telegramClient.execute(message);
-        } catch (TelegramApiException e) {
-            log.error("Сообщение не было отправлено: {}", e.getMessage());
-        }
-    }
-
-    private SendMessage message(Long chatId, String message) {
-        return SendMessage.builder()
-                .chatId(chatId)
-                .text(message)
-                .build();
-    }
-
-    private void sendMenu(Long chatId) {
-        SendMessage sendMessage = message(chatId, "Вот что я могу:");
-
-        InlineKeyboardButton button1 = InlineKeyboardButton.builder()
-                .text("Создать запись")
-                .callbackData("addEntry")
-                .build();
-
-        InlineKeyboardButton button2 = InlineKeyboardButton.builder()
-                .text("Обновить запись")
-                .callbackData("updateEntry")
-                .build();
-
-        InlineKeyboardButton button3 = InlineKeyboardButton.builder()
-                .text("Получить запись по ID")
-                .callbackData("getById")
-                .build();
-
-        InlineKeyboardButton button4 = InlineKeyboardButton.builder()
-                .text("Удалить запись")
-                .callbackData("removeById")
-                .build();
-
-        List<InlineKeyboardRow> keyboards = List.of(
-                new InlineKeyboardRow(button1),
-                new InlineKeyboardRow(button2),
-                new InlineKeyboardRow(button3),
-                new InlineKeyboardRow(button4)
-        );
-
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(keyboards);
-
-        sendMessage.setReplyMarkup(keyboardMarkup);
-
-        execute(sendMessage);
     }
 }

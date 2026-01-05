@@ -18,6 +18,7 @@ public class Notification {
     private static final Long periodCheck = 60L;
     private static final Long initialDelay = 15L;
     private static final TimeUnit timeUnit = TimeUnit.SECONDS;
+
     public void sendNotification(Set<Long> setChatId, String userName, Message message) {
 
         if (!setChatId.isEmpty()) {

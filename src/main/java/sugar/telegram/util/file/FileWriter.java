@@ -14,6 +14,7 @@ import java.nio.file.Files;
 @Slf4j
 public class FileWriter {
     private final boolean append = true;
+
     public void fileWriter(Logger logger, File file) {
         if (!file.exists()) {
             try {

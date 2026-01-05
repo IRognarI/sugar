@@ -41,3 +41,4 @@ bin/
 
 # macOS
 .DS_Store
+logger.txt

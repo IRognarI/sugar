@@ -13,39 +13,78 @@ import java.util.List;
 public class Menu {
 
     public static void sendMenu(Long chatId, Message message) {
-        SendMessage sendMessage = message.sendMessage(chatId, "Вот что я могу:");
+        checkMenu(chatId, message);
+    }
 
-        InlineKeyboardButton button1 = InlineKeyboardButton.builder()
-                .text("Создать запись")
-                .callbackData("addEntry")
-                .build();
+    private void checkMenu(Long chatId, Message message) {
 
-        InlineKeyboardButton button2 = InlineKeyboardButton.builder()
-                .text("Обновить запись")
-                .callbackData("updateEntry")
-                .build();
+        if (chatId == Long.parseLong(System.getenv("my_chat_token"))) {
 
-        InlineKeyboardButton button3 = InlineKeyboardButton.builder()
-                .text("Получить запись по ID")
-                .callbackData("getById")
-                .build();
+            SendMessage sendMessage = message.sendMessage(chatId, "Вот что я могу:");
 
-        /*InlineKeyboardButton button4 = InlineKeyboardButton.builder()
-                .text("Удалить запись")
-                .callbackData("removeById")
-                .build();*/
+            InlineKeyboardButton button1 = InlineKeyboardButton.builder()
+                    .text("Создать запись")
+                    .callbackData("addEntry")
+                    .build();
 
-        List<InlineKeyboardRow> keyboards = List.of(
-                new InlineKeyboardRow(button1),
-                new InlineKeyboardRow(button2),
-                new InlineKeyboardRow(button3)
-                //new InlineKeyboardRow(button4)
-        );
+            InlineKeyboardButton button2 = InlineKeyboardButton.builder()
+                    .text("Обновить запись")
+                    .callbackData("updateEntry")
+                    .build();
 
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(keyboards);
+            InlineKeyboardButton button3 = InlineKeyboardButton.builder()
+                    .text("Получить запись по ID")
+                    .callbackData("getById")
+                    .build();
 
-        sendMessage.setReplyMarkup(keyboardMarkup);
+            InlineKeyboardButton button4 = InlineKeyboardButton.builder()
+                    .text("Удалить запись")
+                    .callbackData("removeById")
+                    .build();
 
-        message.execute(sendMessage);
+            List<InlineKeyboardRow> keyboards = List.of(
+                    new InlineKeyboardRow(button1),
+                    new InlineKeyboardRow(button2),
+                    new InlineKeyboardRow(button3),
+                    new InlineKeyboardRow(button4)
+            );
+
+            InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(keyboards);
+
+            sendMessage.setReplyMarkup(keyboardMarkup);
+
+            message.execute(sendMessage);
+
+        } else {
+
+            SendMessage sendMessage = message.sendMessage(chatId, "Вот что я могу:");
+
+            InlineKeyboardButton button1 = InlineKeyboardButton.builder()
+                    .text("Создать запись")
+                    .callbackData("addEntry")
+                    .build();
+
+            InlineKeyboardButton button2 = InlineKeyboardButton.builder()
+                    .text("Обновить запись")
+                    .callbackData("updateEntry")
+                    .build();
+
+            InlineKeyboardButton button3 = InlineKeyboardButton.builder()
+                    .text("Получить запись по ID")
+                    .callbackData("getById")
+                    .build();
+
+            List<InlineKeyboardRow> keyboards = List.of(
+                    new InlineKeyboardRow(button1),
+                    new InlineKeyboardRow(button2),
+                    new InlineKeyboardRow(button3)
+            );
+
+            InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(keyboards);
+
+            sendMessage.setReplyMarkup(keyboardMarkup);
+
+            message.execute(sendMessage);
+        }
     }
 }

@@ -95,7 +95,7 @@ public class CommandFilter implements LongPollingSingleThreadUpdateConsumer {
                     Menu.sendMenu(logger.getChatId(), message);
 
                 } else if (logger.getMessage().equals("/help")) {
-                    message.execute(message.sendMessage(logger.getChatId(), "Скоро здесь появится инструкция"));
+                    message.execute(message.sendMessage(logger.getChatId(), "@".concat(System.getenv("admin"))));
 
                 } else {
                     message.execute(message.sendMessage(logger.getChatId(), "click 👉 /start"));

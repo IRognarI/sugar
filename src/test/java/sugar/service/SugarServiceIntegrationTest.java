@@ -37,11 +37,12 @@ public class SugarServiceIntegrationTest {
     @Autowired
     private SugarRepository sugarRepository;
 
-    NewSugar newSugar1;
-    NewSugar newSugar2;
-    NewSugar newSugar3;
+    private NewSugar newSugar1;
+    private NewSugar newSugar2;
+    private NewSugar newSugar3;
 
-    double levelSugar = 7.1;
+    private double levelSugar = 7.1;
+    private long chatId = 4234234;
     LocalDateTime date = LocalDateTime.of(2025, 11, 19, 12, 0, 0);
 
     Sugar sugar1;
@@ -66,6 +67,7 @@ public class SugarServiceIntegrationTest {
 
         sugar1 = Sugar.builder()
                 .id(1L)
+                .chatId(chatId)
                 .levelSugar(newSugar3.getSugarLevel())
                 .doseOfInsulin(newSugar3.getDoseOfInsulin())
                 .time(date)
@@ -74,6 +76,7 @@ public class SugarServiceIntegrationTest {
 
         sugar2 = Sugar.builder()
                 .id(sugar1.getId() + 1)
+                .chatId(chatId + 1)
                 .levelSugar(newSugar3.getSugarLevel())
                 .doseOfInsulin(sugar1.getDoseOfInsulin())
                 .time(sugar1.getTime().plusDays(2))
@@ -82,6 +85,7 @@ public class SugarServiceIntegrationTest {
 
         sugar3 = Sugar.builder()
                 .id(sugar2.getId() + 1)
+                .chatId(chatId + 2)
                 .levelSugar(newSugar3.getSugarLevel())
                 .doseOfInsulin(sugar1.getDoseOfInsulin())
                 .time(sugar1.getTime().minusDays(1))
@@ -90,6 +94,7 @@ public class SugarServiceIntegrationTest {
 
         sugar4 = Sugar.builder()
                 .id(sugar3.getId() + 1)
+                .chatId(chatId + 3)
                 .levelSugar(newSugar3.getSugarLevel())
                 .doseOfInsulin(sugar1.getDoseOfInsulin())
                 .time(LocalDateTime.now().minusHours(1))

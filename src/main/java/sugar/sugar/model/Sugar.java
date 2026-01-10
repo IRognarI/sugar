@@ -33,6 +33,9 @@ public class Sugar {
     @Setter(AccessLevel.NONE)
     private Long id;
 
+    @Column(name = "chat_id", nullable = false)
+    private Long chatId;
+
     @Column(nullable = false)
     private double levelSugar;
 

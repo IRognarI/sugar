@@ -42,9 +42,9 @@ public class SugarServiceImplTest {
 
     @BeforeEach
     public void setUp() {
-        newSugar1 = new NewSugar(7, 0.25, null); // Новая запись без заметки
-        newSugar2 = new NewSugar(4, 0.0, null); // Новая запись без инсулина и заметки
-        newSugar3 = new NewSugar(0, 0.75, "При таком сахаре можно не колоть"); // Новая запись с 0 сахаром и заметкой
+        newSugar1 = new NewSugar(7, 435, 0.25, null); // Новая запись без заметки
+        newSugar2 = new NewSugar(4, 34534, 0.0, null); // Новая запись без инсулина и заметки
+        newSugar3 = new NewSugar(0, 34534, 0.75, "При таком сахаре можно не колоть"); // Новая запись с 0 сахаром и заметкой
 
         sugarNotFull1 = Sugar.builder()
                 .levelSugar(newSugar1.getSugarLevel())

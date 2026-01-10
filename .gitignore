@@ -17,6 +17,7 @@ out/
 target/
 amplicode.xml
 .env
+.flyway.conf
 
 # Eclipse
 .apt_generated

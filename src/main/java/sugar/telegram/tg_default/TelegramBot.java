@@ -4,13 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.longpolling.interfaces.LongPollingUpdateConsumer;
 import org.telegram.telegrambots.longpolling.starter.SpringLongPollingBot;
-import sugar.telegram.update.UpdateConsumer;
+import sugar.telegram.filter.CommandFilter;
 
 @Component
 @RequiredArgsConstructor
 public class TelegramBot implements SpringLongPollingBot {
 
-    private final UpdateConsumer updateConsumer;
+    private final CommandFilter commandFilter;
 
 
     @Override
@@ -20,6 +20,6 @@ public class TelegramBot implements SpringLongPollingBot {
 
     @Override
     public LongPollingUpdateConsumer getUpdatesConsumer() {
-        return updateConsumer;
+        return commandFilter;
     }
 }

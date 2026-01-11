@@ -18,6 +18,7 @@ target/
 amplicode.xml
 .env
 /logger.txt
+/amplicode.xml
 
 # Eclipse
 .apt_generated

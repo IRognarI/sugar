@@ -42,6 +42,7 @@ public class SugarServiceImpl implements SugarService {
 
         Sugar sugar = Sugar.builder()
                 .levelSugar(newSugar.getSugarLevel())
+                .chatId(newSugar.getChatId())
                 .doseOfInsulin(newSugar.getDoseOfInsulin())
                 .time(LocalDateTime.now())
                 .note(newSugar.getNote())
@@ -138,6 +139,7 @@ public class SugarServiceImpl implements SugarService {
     }
 
     @Override
+    @Deprecated
     public void clearAll() {
         sugarRepository.deleteAll();
     }

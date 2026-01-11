@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:latest
@@ -19,6 +17,18 @@ services:
       start_period: 10s
       retries: 5
 
+  flyway:
+    image: flyway/flyway:9
+    depends_on:
+      - postgres
+    environment:
+      - FLYWAY_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      - FLYWAY_USER=${POSTGRES_USER}
+      - FLYWAY_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - ./migrations:/flyway/sql
+    command: migrate
+
   sugar-bot:
     build: .
     container_name: sugar-bot
@@ -30,6 +40,7 @@ services:
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       my_chat_token: ${my_chat_token}
       LOGGING_LEVEL_SUGAR: ${LOGGING_LEVEL_SUGAR}
+      ADMIN: ${ADMIN}
 
     depends_on:
       postgres:

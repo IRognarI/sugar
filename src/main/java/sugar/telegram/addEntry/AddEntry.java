@@ -21,6 +21,7 @@ public class AddEntry {
         UserSt userSt = new UserSt();
         NewSugar newSugar = new NewSugar();
         userSt.setNewSugar(newSugar);
+        userSt.getNewSugar().setChatId(chatId);
 
         message.execute(message.sendMessage(chatId, "Введите сахар"));
 
@@ -37,6 +38,7 @@ public class AddEntry {
             try {
                 double sugarLevel = Double.parseDouble(note.trim());
                 userSt.getNewSugar().setSugarLevel(sugarLevel);
+                log.info("ChatId в userSt.getNewSugar() == {}", userSt.getNewSugar().getChatId());
                 log.debug("Записали сахар в handleWriteSugar: {}", userSt.getNewSugar().getSugarLevel());
 
                 message.execute(message.sendMessage(chatId, "Укажите дозу инсулина 👇 Если указывать не нужно, отправьте точку"));
@@ -95,7 +97,7 @@ public class AddEntry {
             message.execute(message.sendMessage(chatId, "Заметка остается по умолчанию: " + userSt.getNewSugar().getNote()));
         }
 
-        SugarDto sugarDto = sugarService.addEntry(userStMap.get(chatId).getNewSugar());
+        SugarDto sugarDto = sugarService.addEntry(userSt.getNewSugar());
         message.execute(message.sendMessage(chatId, message.answerAfterSaved(sugarDto)));
 
         userStMap.remove(chatId);

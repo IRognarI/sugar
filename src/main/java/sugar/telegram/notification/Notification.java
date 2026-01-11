@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 import sugar.telegram.util.message.Message;
 
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -13,44 +15,36 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 public class Notification {
-    private static final LocalTime morningTime = LocalTime.of(7, 30);
-    private static final LocalTime eveningTime = LocalTime.of(20, 30);
-    private static final Long periodCheck = 60L;
-    private static final Long initialDelay = 15L;
-    private static final TimeUnit timeUnit = TimeUnit.SECONDS;
+    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+    private final ZoneId zoneId = ZoneId.of("Europe/Moscow");
+    private final LocalTime morningTime = LocalTime.of(7, 32);
+    private final LocalTime eveningTime = LocalTime.of(19, 32);
 
     public void sendNotification(Set<Long> setChatId, String userName, Message message) {
 
-        if (!setChatId.isEmpty()) {
-            log.debug("Зашли в sendNotification");
+        if (setChatId.isEmpty()) {
+            log.info("setChatId is empty");
+            return;
+        }
 
-            ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+        log.info("Кол-во user для получения уведомления: {}", setChatId.size());
 
-            executorService.scheduleAtFixedRate(() -> {
-                log.debug("Внутри дочернего потока");
+        executorService.scheduleAtFixedRate(() -> {
 
-                LocalTime now = LocalTime.now();
+            LocalTime now = LocalTime.now(zoneId).truncatedTo(ChronoUnit.MINUTES);
+            boolean timeIsMessage = now.equals(morningTime) || now.equals(eveningTime);
+            log.debug("LocalTimeNow ({}) == morningTime ({}) or eveningTime ({}): {}", now, morningTime, eveningTime, timeIsMessage);
 
-                int hour = now.getHour();
-                int minute = now.getMinute();
+            if (timeIsMessage) {
 
-                if ((hour == morningTime.getHour() && minute == morningTime.getMinute()) ||
-                        (hour == eveningTime.getHour() && minute == eveningTime.getMinute())) {
+                for (Long id : setChatId) {
 
-                    for (Long id : setChatId) {
-                        log.info("Отправили сообщение пользователю: " + id);
-
-                        String text = userName != null ? userName + ", не забудьте внести запись" :
-                                "Не забудьте внести запись";
-
-                        message.execute(message.sendMessage(id, text));
-                    }
+                    message.execute(message.sendMessage(id, userName != null ? userName + ", не забудьте внести запись" :
+                            "Не забудьте внести запись"));
                 }
 
-            }, initialDelay, periodCheck, timeUnit);
-
-        } else {
-            log.info("setChatId пустой");
-        }
+                executorService.shutdown();
+            }
+        }, 0, 60, TimeUnit.SECONDS);
     }
 }

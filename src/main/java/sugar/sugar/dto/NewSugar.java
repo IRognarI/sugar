@@ -1,5 +1,6 @@
 package sugar.sugar.dto;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +19,10 @@ import org.hibernate.validator.constraints.Length;
 public class NewSugar {
     @Positive(message = "Уровень сахара должен быть больше ноля")
     private double sugarLevel;
+
+    @Positive(message = "chatId должен быть больше ноля")
+    @NotNull(message = "chatId должен быть указан")
+    private long chatId;
 
     @Builder.Default
     private double doseOfInsulin = 0;

@@ -37,7 +37,7 @@ public class CommandFilter implements LongPollingSingleThreadUpdateConsumer {
     private final Notification notification;
     private final SugarServiceImpl sugarService;
     private static final File file = new File("logger.txt");
-    private Set<Long> setChatId = new HashSet<>();
+    private final Set<Long> setChatId = new HashSet<>();
     private final Map<Long, UserSt> userStMap = new TreeMap<>();
 
     @Override
@@ -95,7 +95,7 @@ public class CommandFilter implements LongPollingSingleThreadUpdateConsumer {
                     Menu.sendMenu(logger.getChatId(), message);
 
                 } else if (logger.getMessage().equals("/help")) {
-                    message.execute(message.sendMessage(logger.getChatId(), "@".concat(System.getenv("admin"))));
+                    message.execute(message.sendMessage(logger.getChatId(), "@".concat(System.getenv("ADMIN"))));
 
                 } else {
                     message.execute(message.sendMessage(logger.getChatId(), "click 👉 /start"));

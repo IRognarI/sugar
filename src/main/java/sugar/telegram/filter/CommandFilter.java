@@ -51,8 +51,6 @@ public class CommandFilter implements LongPollingSingleThreadUpdateConsumer {
                 setChatId.add(logger.getChatId());
                 log.info("Новое сообщение: {}", logger);
 
-                notification.sendNotification(setChatId, update.getMessage().getFrom().getFirstName(), message);
-
                 writer.fileWriter(logger, file);
 
                 UserSt userSt = userStMap.get(logger.getChatId());
@@ -89,6 +87,12 @@ public class CommandFilter implements LongPollingSingleThreadUpdateConsumer {
 
                         case WAIT_NOTE_FOR_UPDATE ->
                                 updateEntry.handleWriteUpdateNote(logger.getChatId(), logger.getMessage(), userStMap, message);
+
+                        case WAIT_TIME_FOR_NOTIFY ->
+                                notification.setNotify(logger.getChatId(), logger.getMessage(), message, userStMap);
+
+                        case SET_TIME_FOR_NOTIFY ->
+                                notification.sendNotify(logger.getChatId(), message, logger.getMessage(), userStMap);
                     }
 
                 } else if (logger.getMessage().equals("/start")) {
@@ -118,6 +122,16 @@ public class CommandFilter implements LongPollingSingleThreadUpdateConsumer {
                 case "getById" -> get.getBySugarIdStart(chatId, userStMap, message);
 
                 case "removeById" -> delete.removeStart(chatId, userStMap, message);
+
+                case "createNotify" -> notification.plug(chatId, message);
+
+                case "disableNotify" -> notification.disableNotify(chatId, message, userStMap);
+
+                case "contextReset" -> {
+                    userStMap.remove(chatId);
+                    message.execute(message.sendMessage(chatId, "Контекст сброшен"));
+                    Menu.sendMenu(chatId, message);
+                }
 
                 default -> message.execute(message.sendMessage(chatId, "Не известная команда 🤷‍♂️"));
             }

@@ -4,12 +4,14 @@ import lombok.experimental.UtilityClass;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 @UtilityClass
 public class DateTimeFormat {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
     public static String dateTimeToString(LocalDateTime time) {
         return time.format(DATE_TIME_FORMATTER);
@@ -25,5 +27,9 @@ public class DateTimeFormat {
 
     public LocalDate getDateTimeFormatter(String time) {
         return LocalDate.parse(time, DATE_TIME_FORMATTER);
+    }
+
+    public LocalTime parseTime(String time) {
+        return LocalTime.parse(time, TIME_FORMATTER);
     }
 }

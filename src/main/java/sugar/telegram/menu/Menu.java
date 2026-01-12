@@ -38,15 +38,33 @@ public class Menu {
                     .build();
 
             InlineKeyboardButton button4 = InlineKeyboardButton.builder()
+                    .text("Создать напоминание")
+                    .callbackData("createNotify")
+                    .build();
+
+            InlineKeyboardButton button5 = InlineKeyboardButton.builder()
                     .text("Удалить запись")
                     .callbackData("removeById")
+                    .build();
+
+            InlineKeyboardButton button6 = InlineKeyboardButton.builder()
+                    .text("Отключить напоминания")
+                    .callbackData("disableNotify")
+                    .build();
+
+            InlineKeyboardButton button7 = InlineKeyboardButton.builder()
+                    .text("Сброс контекста")
+                    .callbackData("contextReset")
                     .build();
 
             List<InlineKeyboardRow> keyboards = List.of(
                     new InlineKeyboardRow(button1),
                     new InlineKeyboardRow(button2),
                     new InlineKeyboardRow(button3),
-                    new InlineKeyboardRow(button4)
+                    new InlineKeyboardRow(button4),
+                    new InlineKeyboardRow(button6),
+                    new InlineKeyboardRow(button5),
+                    new InlineKeyboardRow(button7)
             );
 
             InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(keyboards);
@@ -74,10 +92,28 @@ public class Menu {
                     .callbackData("getById")
                     .build();
 
+            InlineKeyboardButton button4 = InlineKeyboardButton.builder()
+                    .text("Создать напоминание")
+                    .callbackData("createNotify")
+                    .build();
+
+            InlineKeyboardButton button5 = InlineKeyboardButton.builder()
+                    .text("Отключить напоминания")
+                    .callbackData("disableNotify")
+                    .build();
+
+            InlineKeyboardButton button6 = InlineKeyboardButton.builder()
+                    .text("Сброс контекста")
+                    .callbackData("contextReset")
+                    .build();
+
             List<InlineKeyboardRow> keyboards = List.of(
                     new InlineKeyboardRow(button1),
                     new InlineKeyboardRow(button2),
-                    new InlineKeyboardRow(button3)
+                    new InlineKeyboardRow(button3),
+                    /*new InlineKeyboardRow(button4),
+                    new InlineKeyboardRow(button5),*/
+                    new InlineKeyboardRow(button6)
             );
 
             InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(keyboards);

@@ -12,6 +12,7 @@ import sugar.telegram.enums.State;
 @Setter
 public class UserSt {
     private State state;
+    private Boolean getNotify;
     private NewSugar newSugar;
     private UpdateSugar update;
 }

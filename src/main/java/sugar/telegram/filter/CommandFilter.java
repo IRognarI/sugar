@@ -18,9 +18,7 @@ import sugar.telegram.util.file.FileWriter;
 import sugar.telegram.util.message.Message;
 
 import java.io.File;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 @RequiredArgsConstructor
@@ -37,7 +35,6 @@ public class CommandFilter implements LongPollingSingleThreadUpdateConsumer {
     private final Notification notification;
     private final SugarServiceImpl sugarService;
     private static final File file = new File("logger.txt");
-    private final Set<Long> setChatId = new HashSet<>();
     private final Map<Long, UserSt> userStMap = new TreeMap<>();
 
     @Override
@@ -48,7 +45,6 @@ public class CommandFilter implements LongPollingSingleThreadUpdateConsumer {
             if (update.getMessage().hasText()) {
 
                 Logger logger = new Logger(update.getMessage().getChatId(), update.getMessage().getText());
-                setChatId.add(logger.getChatId());
                 log.info("Новое сообщение: {}", logger);
 
                 writer.fileWriter(logger, file);
@@ -88,9 +84,6 @@ public class CommandFilter implements LongPollingSingleThreadUpdateConsumer {
                         case WAIT_NOTE_FOR_UPDATE ->
                                 updateEntry.handleWriteUpdateNote(logger.getChatId(), logger.getMessage(), userStMap, message);
 
-                        case WAIT_TIME_FOR_NOTIFY ->
-                                notification.setNotify(logger.getChatId(), logger.getMessage(), message, userStMap);
-
                         case SET_TIME_FOR_NOTIFY ->
                                 notification.sendNotify(logger.getChatId(), message, logger.getMessage(), userStMap);
                     }
@@ -123,7 +116,7 @@ public class CommandFilter implements LongPollingSingleThreadUpdateConsumer {
 
                 case "removeById" -> delete.removeStart(chatId, userStMap, message);
 
-                case "createNotify" -> notification.plug(chatId, message);
+                case "createNotify" -> notification.start(chatId, userStMap, message);
 
                 case "disableNotify" -> notification.disableNotify(chatId, message, userStMap);
 

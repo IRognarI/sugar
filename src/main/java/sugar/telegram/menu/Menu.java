@@ -111,8 +111,8 @@ public class Menu {
                     new InlineKeyboardRow(button1),
                     new InlineKeyboardRow(button2),
                     new InlineKeyboardRow(button3),
-                    new InlineKeyboardRow(button4),
-                    new InlineKeyboardRow(button5),
+                    /*new InlineKeyboardRow(button4),
+                    new InlineKeyboardRow(button5),*/
                     new InlineKeyboardRow(button6)
             );
 

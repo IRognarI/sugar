@@ -16,8 +16,6 @@ CREATE TABLE IF NOT EXISTS sugars
     0,
     time
     TIMESTAMP
-    DEFAULT
-    CURRENT_TIMESTAMP
     NOT
     NULL,
     note

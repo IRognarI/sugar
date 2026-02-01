@@ -14,7 +14,6 @@ import sugar_bot.sugar.exception.NotFoundException;
 import sugar_bot.sugar.exception.ValidationException;
 import sugar_bot.sugar.model.Sugar;
 import sugar_bot.sugar.repository.SugarRepository;
-import sugar_bot.sugar.service.SugarServiceImpl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

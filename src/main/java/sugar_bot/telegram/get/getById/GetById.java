@@ -1,4 +1,4 @@
-package sugar_bot.telegram.get;
+package sugar_bot.telegram.get.getById;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ import java.util.Map;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class Get {
+public class GetById {
     public void getBySugarIdStart(Long chatId, Map<Long, UserSt> userStMap, Message message) {
         UserSt userSt = userStMap.get(chatId);
 

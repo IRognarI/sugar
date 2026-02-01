@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import sugar_bot.sugar.model.Sugar;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,4 +28,12 @@ public interface SugarRepository extends JpaRepository<Sugar, Long> {
                         )
             """, nativeQuery = true)
     boolean existsByChatId(@Param("chatId") Long chatId);
+
+
+    @Query(value = """
+            select *
+            from sugars
+            where time between :timeStart and :timeEnd
+            """, nativeQuery = true)
+    List<Sugar> findByTimeBetween(@Param("timeStart") LocalDateTime timeStart, @Param("timeEnd") LocalDateTime timeEnd);
 }

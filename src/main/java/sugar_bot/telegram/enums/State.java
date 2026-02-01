@@ -12,4 +12,5 @@ public enum State {
     WAIT_NOTE_FOR_UPDATE,
     UPDATE_START,
     WAIT_TIME_FOR_NOTIFY,
+    WAITING_FOR_DATES,
 }

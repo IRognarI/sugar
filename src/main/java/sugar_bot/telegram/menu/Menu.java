@@ -52,13 +52,19 @@ public class Menu {
                     .callbackData("disableNotify")
                     .build();
 
+            InlineKeyboardButton button7 = InlineKeyboardButton.builder()
+                    .text("Получить записи за период")
+                    .callbackData("getEntryForPeriod")
+                    .build();
+
             List<InlineKeyboardRow> keyboards = List.of(
                     new InlineKeyboardRow(button1),
                     new InlineKeyboardRow(button2),
                     new InlineKeyboardRow(button3),
                     new InlineKeyboardRow(button4),
+                    new InlineKeyboardRow(button5),
                     new InlineKeyboardRow(button6),
-                    new InlineKeyboardRow(button5)
+                    new InlineKeyboardRow(button7)
             );
 
             InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(keyboards);
@@ -96,12 +102,18 @@ public class Menu {
                     .callbackData("disableNotify")
                     .build();
 
+            InlineKeyboardButton button6 = InlineKeyboardButton.builder()
+                    .text("Получить записи за период")
+                    .callbackData("getEntryForPeriod")
+                    .build();
+
             List<InlineKeyboardRow> keyboards = List.of(
                     new InlineKeyboardRow(button1),
                     new InlineKeyboardRow(button2),
                     new InlineKeyboardRow(button3),
                     new InlineKeyboardRow(button4),
-                    new InlineKeyboardRow(button5)
+                    new InlineKeyboardRow(button5),
+                    new InlineKeyboardRow(button6)
             );
 
             InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(keyboards);

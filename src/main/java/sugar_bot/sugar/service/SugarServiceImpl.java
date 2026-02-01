@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -139,9 +140,47 @@ public class SugarServiceImpl implements SugarService {
     }
 
     @Override
-    @Deprecated
-    public void clearAll() {
-        sugarRepository.deleteAll();
+    @Transactional(readOnly = true)
+    public List<SugarDto> getSugarBetweenPeriod(LocalDateTime start, LocalDateTime end) {
+
+        periodForSearchValidate(start, end);
+
+        log.info("Получили даты для поиска записей.\nНачало поиска: {}\nКонец поиска: {}", start, end);
+
+        List<Sugar> sugarList = sugarRepository.findByTimeBetween(start, end.plusDays(1));
+
+        log.info("Кол-во возвращенных записей: {}", sugarList.size());
+
+        return sugarList.stream()
+                .map(sugar -> {
+
+                    Optional<Sugar> sugarStory = getSugarStory(sugar);
+
+                    return SugarMapper.toDto(sugar, sugarStory);
+                })
+                .collect(Collectors.toList());
+    }
+
+    private void periodForSearchValidate(LocalDateTime start, LocalDateTime end) throws ValidationException {
+
+        if (start == null) {
+            throw new ValidationException("Укажите дату начала поиска записей");
+
+        } else if (end == null || end.isAfter(LocalDateTime.now())) {
+            end = LocalDateTime.now().plusDays(1);
+
+        } else if (start.isAfter(end)) {
+            throw new ValidationException("Дата начала поиска не может быть позже конечной даты поиска");
+
+        } else if (end.isBefore(start)) {
+            throw new ValidationException("Дата конца поиска не может быть до даты начала поиска");
+
+        } else if (start.isEqual(end)) {
+            throw new ValidationException("Дата начала поиска: " + start + " и дата конца поиска: " + end + " - должны отличаться");
+
+        } else if (start.isAfter(LocalDateTime.now())) {
+            throw new ValidationException(start + " не может быть позже: " + LocalDate.now());
+        }
     }
 
     private Optional<Sugar> findDateTimeMax(List<Sugar> sugarList) {

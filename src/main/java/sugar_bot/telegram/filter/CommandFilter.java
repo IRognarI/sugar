@@ -5,10 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import sugar_bot.sugar.service.SugarServiceImpl;
+import sugar_bot.sugar.interfaces.SugarService;
 import sugar_bot.telegram.addEntry.AddEntry;
 import sugar_bot.telegram.clear.Delete;
-import sugar_bot.telegram.get.Get;
+import sugar_bot.telegram.get.getById.GetById;
+import sugar_bot.telegram.get.getForPeriod.GetForPeriod;
 import sugar_bot.telegram.loger.Logger;
 import sugar_bot.telegram.menu.Menu;
 import sugar_bot.telegram.notification.Notification;
@@ -30,10 +31,11 @@ public class CommandFilter implements LongPollingSingleThreadUpdateConsumer {
     private final FileWriter writer;
     private final AddEntry addEntry;
     private final Delete delete;
-    private final Get get;
+    private final GetById getById;
     private final UpdateEntry updateEntry;
     private final Notification notification;
-    private final SugarServiceImpl sugarService;
+    private final SugarService sugarService;
+    private final GetForPeriod getForPeriod;
     private static final File file = new File("logger.txt");
     private final Map<Long, UserSt> userStMap = new TreeMap<>();
 
@@ -67,7 +69,7 @@ public class CommandFilter implements LongPollingSingleThreadUpdateConsumer {
                                 delete.removeById(logger.getChatId(), logger.getMessage(), sugarService, message, userStMap);
 
                         case GET_SUGAR_BY_ID ->
-                                get.getSugarById(logger.getChatId(), logger.getMessage(), sugarService, message, userStMap);
+                                getById.getSugarById(logger.getChatId(), logger.getMessage(), sugarService, message, userStMap);
 
                         case WAIT_ID_FOR_UPDATE ->
                                 updateEntry.sugarUpdate(logger.getChatId(), logger.getMessage(), userSt, sugarService, message, userStMap);
@@ -86,6 +88,9 @@ public class CommandFilter implements LongPollingSingleThreadUpdateConsumer {
 
                         case WAIT_TIME_FOR_NOTIFY ->
                                 notification.setNotify(logger.getChatId(), logger.getMessage(), message, userStMap);
+
+                        case WAITING_FOR_DATES ->
+                                getForPeriod.returnEntryList(logger.getChatId(), logger.getMessage(), message, userStMap);
                     }
 
                 } else if (logger.getMessage().equals("/start")) {
@@ -112,13 +117,15 @@ public class CommandFilter implements LongPollingSingleThreadUpdateConsumer {
 
                 case "updateEntry" -> updateEntry.updateStart(chatId, userStMap, message);
 
-                case "getById" -> get.getBySugarIdStart(chatId, userStMap, message);
+                case "getById" -> getById.getBySugarIdStart(chatId, userStMap, message);
 
                 case "removeById" -> delete.removeStart(chatId, userStMap, message);
 
                 case "createNotify" -> notification.sendNotify(chatId, message, userStMap);
 
                 case "disableNotify" -> notification.disableNotify(chatId, message, userStMap);
+
+                case "getEntryForPeriod" -> getForPeriod.requestPeriod(chatId, message, userStMap);
 
                 default -> message.execute(message.sendMessage(chatId, "Не известная команда 🤷‍♂️"));
             }

@@ -100,7 +100,7 @@ public class AddEntry {
         SugarDto sugarDto = sugarService.addEntry(userSt.getNewSugar());
         message.execute(message.sendMessage(chatId, message.answerAfterSaved(sugarDto)));
 
-        userStMap.remove(chatId);
+        userStMap.get(chatId).setState(State.START);
         Menu.sendMenu(chatId, message);
     }
 }

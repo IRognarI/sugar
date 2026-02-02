@@ -1,6 +1,7 @@
 package sugar_bot.telegram.enums;
 
 public enum State {
+    START,
     SUGAR,
     INSULIN,
     NOTE,

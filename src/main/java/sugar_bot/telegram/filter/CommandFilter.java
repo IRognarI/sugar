@@ -56,6 +56,9 @@ public class CommandFilter implements LongPollingSingleThreadUpdateConsumer {
                 if (userSt != null) {
 
                     switch (userSt.getState()) {
+
+                        case START -> Menu.sendMenu(logger.getChatId(), message);
+
                         case SUGAR ->
                                 addEntry.handleWriteSugar(logger.getChatId(), logger.getMessage(), userStMap, message);
 

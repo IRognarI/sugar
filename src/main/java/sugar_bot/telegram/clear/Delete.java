@@ -61,7 +61,7 @@ public class Delete {
 
                 if (entryExists != null) {
                     sugarService.removeSugarById(sugarId);
-                    userStMap.remove(chatId);
+                    userStMap.get(chatId).setState(State.START);
                     message.execute(message.sendMessage(chatId, "Запись с ID= " + sugarId + " - была удалена"));
                     Menu.sendMenu(chatId, message);
                 }

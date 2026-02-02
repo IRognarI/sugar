@@ -40,7 +40,7 @@ public class GetById {
                     SugarDto sugarDto = sugarService.getSugarById(sugarId);
 
                     message.execute(message.sendMessage(chatId, message.answerAfterSaved(sugarDto)));
-                    userStMap.remove(chatId);
+                    userStMap.get(chatId).setState(State.START);
                     Menu.sendMenu(chatId, message);
                 } catch (ValidationException | NotFoundException e) {
                     message.execute(message.sendMessage(chatId, e.getMessage()));

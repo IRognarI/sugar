@@ -16,12 +16,10 @@ public class SugarMapper {
         if (sugarStory.isPresent()) {
 
             if (sugarStory.get().getId() > sugarDto.getId()) {
-                // id последней записи в которой было найдено совпадение по уровню сахара
                 sugarDto.setId(sugarStory.get().getId());
             }
 
             if (sugarStory.get().getDoseOfInsulin() > sugarDto.getLastDoseOfInsulin()) {
-                // доза инсулина, которая была уколота в последний раз при совпадении по уровню сахара
                 sugarDto.setLastDoseOfInsulin(sugarStory.get().getDoseOfInsulin());
             }
 

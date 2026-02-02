@@ -42,7 +42,7 @@ public class Sugar {
     @Builder.Default
     private double doseOfInsulin = 0;
 
-    @Column(nullable = false, columnDefinition = "TIMESTAMP")
+    @Column(nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private LocalDateTime time;
 
     @Length(max = 255, message = "Максимальное кол-во символов: 255")

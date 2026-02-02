@@ -7,6 +7,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardRow;
 import sugar_bot.telegram.util.message.Message;
 
+import java.util.LinkedList;
 import java.util.List;
 
 @UtilityClass
@@ -43,13 +44,13 @@ public class Menu {
                     .build();
 
             InlineKeyboardButton button5 = InlineKeyboardButton.builder()
-                    .text("Удалить запись")
-                    .callbackData("removeById")
+                    .text("Отключить напоминания")
+                    .callbackData("disableNotify")
                     .build();
 
             InlineKeyboardButton button6 = InlineKeyboardButton.builder()
-                    .text("Отключить напоминания")
-                    .callbackData("disableNotify")
+                    .text("Удалить запись")
+                    .callbackData("removeById")
                     .build();
 
             InlineKeyboardButton button7 = InlineKeyboardButton.builder()
@@ -107,14 +108,14 @@ public class Menu {
                     .callbackData("getEntryForPeriod")
                     .build();
 
-            List<InlineKeyboardRow> keyboards = List.of(
+            List<InlineKeyboardRow> keyboards = new LinkedList<>(List.of(
                     new InlineKeyboardRow(button1),
                     new InlineKeyboardRow(button2),
                     new InlineKeyboardRow(button3),
                     new InlineKeyboardRow(button4),
                     new InlineKeyboardRow(button5),
                     new InlineKeyboardRow(button6)
-            );
+            ));
 
             InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(keyboards);
 

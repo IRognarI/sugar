@@ -141,7 +141,7 @@ public class SugarServiceImpl implements SugarService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SugarDto> getSugarBetweenPeriod(LocalDateTime start, LocalDateTime end) {
+    public List<SugarDto> getSugarBetweenPeriod(LocalDateTime start, LocalDateTime end) throws ValidationException {
 
         periodForSearchValidate(start, end);
 
@@ -166,20 +166,11 @@ public class SugarServiceImpl implements SugarService {
         if (start == null) {
             throw new ValidationException("Укажите дату начала поиска записей");
 
-        } else if (end == null || end.isAfter(LocalDateTime.now())) {
+        } else if (!start.isBefore(end)) {
+            throw new ValidationException("Дата: " + start.toLocalDate() + " должны быть раньше чем: " + end.toLocalDate());
+
+        } else if (end == null) {
             end = LocalDateTime.now().plusDays(1);
-
-        } else if (start.isAfter(end)) {
-            throw new ValidationException("Дата начала поиска не может быть позже конечной даты поиска");
-
-        } else if (end.isBefore(start)) {
-            throw new ValidationException("Дата конца поиска не может быть до даты начала поиска");
-
-        } else if (start.isEqual(end)) {
-            throw new ValidationException("Дата начала поиска: " + start + " и дата конца поиска: " + end + " - должны отличаться");
-
-        } else if (start.isAfter(LocalDateTime.now())) {
-            throw new ValidationException(start + " не может быть позже: " + LocalDate.now());
         }
     }
 

@@ -41,8 +41,7 @@ public class GetForPeriod {
 
         userStMap.put(chatId, userSt);
 
-        message.execute(message.sendMessage(chatId, "Сначала отправьте дату начала поиска, после - дату окончания поиска." +
-                " Ожидаемый формат даты: 23.12.2025\nПо окончании ввода дат, отправьте точку"));
+        message.execute(message.sendMessage(chatId, sendInstruction()));
     }
 
     public void returnEntryList(Long chatId, String val, Message message, Map<Long, UserSt> userStMap) {
@@ -101,17 +100,34 @@ public class GetForPeriod {
 
             log.debug("Кол-во найденных записей: {}", sugarDtosList.size());
 
-            if (dateList.isEmpty())  message.execute(message.sendMessage(chatId, "Записи за указанный период не найдены"));
+            if (sugarDtosList.isEmpty()) {
 
-            for (SugarDto dto : sugarDtosList) {
+                message.execute(message.sendMessage(chatId, "Записи за указанный период не найдены"));
 
-                message.execute(message.sendMessage(chatId, message.answerAfterSaved(dto)));
+            } else {
+
+                for (SugarDto dto : sugarDtosList) {
+
+                    message.execute(message.sendMessage(chatId, message.answerAfterSaved(dto)));
+                }
+
+                log.info("Отправили записи пользователю {}", chatId);
             }
-
-            log.info("Отправили записи пользователю {}", chatId);
 
         } catch (ValidationException e) {
             message.execute(message.sendMessage(chatId, e.getMessage()));
         }
+    }
+
+    private String sendInstruction() {
+
+        return """
+                1️⃣ Отправьте дату начала поиска
+                2️⃣ После - дату окончания поиска
+                
+                🔸 По окончании ввода дат, отправьте точку
+                
+                ✅ Ожидаемый формат даты: 23.12.2025
+                """;
     }
 }

@@ -16,7 +16,7 @@ import lombok.ToString;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.validator.constraints.Length;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 @NoArgsConstructor
@@ -43,7 +43,7 @@ public class Sugar {
     private double doseOfInsulin = 0;
 
     @Column(nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    private LocalDateTime time;
+    private Instant time;
 
     @Length(max = 255, message = "Максимальное кол-во символов: 255")
     private String note;

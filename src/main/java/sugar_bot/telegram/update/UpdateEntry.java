@@ -51,7 +51,7 @@ public class UpdateEntry {
                 case "/end":
                     SugarDto sugarDto = sugarService.updateEntry(updateSugar);
                     message.execute(message.sendMessage(chatId, String.format("Обновленная запись:%n%n%s", message.answerAfterSaved(sugarDto))));
-                    userStMap.remove(chatId);
+                    userStMap.get(chatId).setState(State.START);
                     Menu.sendMenu(chatId, message);
                     break;
 

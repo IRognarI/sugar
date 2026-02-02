@@ -62,7 +62,7 @@ public class GetForPeriod {
                 whenBothDatesAreReceived(dateList, message, chatId);
 
                 dateList.clear();
-                userStMap.remove(chatId);
+                userStMap.get(chatId).setState(State.START);
             }
 
         } catch (DateTimeParseException e) {

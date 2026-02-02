@@ -15,7 +15,9 @@ import sugar_bot.sugar.exception.ValidationException;
 import sugar_bot.sugar.model.Sugar;
 import sugar_bot.sugar.repository.SugarRepository;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +50,7 @@ public class SugarServiceImplTest {
         sugarNotFull1 = Sugar.builder()
                 .levelSugar(newSugar1.getSugarLevel())
                 .doseOfInsulin(newSugar1.getDoseOfInsulin())
-                .time(LocalDateTime.of(2025, 11, 21, 13, 0, 0))
+                .time(LocalDateTime.of(2025, 11, 21, 13, 0, 0).toInstant(ZoneOffset.of("+03:00")))
                 .note(newSugar1.getNote())
                 .build();
 
@@ -57,7 +59,7 @@ public class SugarServiceImplTest {
         sugarNotFull2 = Sugar.builder()
                 .levelSugar(newSugar2.getSugarLevel())
                 .doseOfInsulin(newSugar2.getDoseOfInsulin())
-                .time(LocalDateTime.of(2025, 11, 25, 11, 00, 0))
+                .time(LocalDateTime.of(2025, 11, 25, 11, 00, 0).toInstant(ZoneOffset.of("+03:00")))
                 .note(newSugar2.getNote())
                 .build();
 

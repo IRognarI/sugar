@@ -17,6 +17,7 @@ import sugar_bot.sugar.maper.SugarMapper;
 import sugar_bot.sugar.model.Sugar;
 import sugar_bot.sugar.repository.SugarRepository;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -45,7 +46,7 @@ public class SugarServiceImpl implements SugarService {
                 .levelSugar(newSugar.getSugarLevel())
                 .chatId(newSugar.getChatId())
                 .doseOfInsulin(newSugar.getDoseOfInsulin())
-                .time(LocalDateTime.now())
+                .time(Instant.now())
                 .note(newSugar.getNote())
                 .build();
 

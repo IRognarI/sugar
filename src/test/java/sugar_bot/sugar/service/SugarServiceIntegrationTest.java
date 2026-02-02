@@ -20,7 +20,10 @@ import sugar_bot.sugar.interfaces.SugarService;
 import sugar_bot.sugar.model.Sugar;
 import sugar_bot.sugar.repository.SugarRepository;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -43,7 +46,7 @@ public class SugarServiceIntegrationTest {
 
     private double levelSugar = 7.1;
     private long chatId = 4234234;
-    LocalDateTime date = LocalDateTime.of(2025, 11, 19, 12, 0, 0);
+    Instant date = LocalDateTime.of(2025, 11, 19, 12, 0, 0).toInstant(ZoneOffset.of("+03:00"));
 
     Sugar sugar1;
     Sugar sugar2;
@@ -79,7 +82,7 @@ public class SugarServiceIntegrationTest {
                 .chatId(chatId + 1)
                 .levelSugar(newSugar3.getSugarLevel())
                 .doseOfInsulin(sugar1.getDoseOfInsulin())
-                .time(sugar1.getTime().plusDays(2))
+                .time(sugar1.getTime().plus(1L, ChronoUnit.DAYS))
                 .note(sugar1.getNote())
                 .build();
 
@@ -88,7 +91,7 @@ public class SugarServiceIntegrationTest {
                 .chatId(chatId + 2)
                 .levelSugar(newSugar3.getSugarLevel())
                 .doseOfInsulin(sugar1.getDoseOfInsulin())
-                .time(sugar1.getTime().minusDays(1))
+                .time(sugar1.getTime().minus(1L, ChronoUnit.DAYS))
                 .note(sugar1.getNote())
                 .build();
 
@@ -97,7 +100,7 @@ public class SugarServiceIntegrationTest {
                 .chatId(chatId + 3)
                 .levelSugar(newSugar3.getSugarLevel())
                 .doseOfInsulin(sugar1.getDoseOfInsulin())
-                .time(LocalDateTime.now().minusHours(1))
+                .time(Instant.now().minus(1L, ChronoUnit.HOURS))
                 .note(sugar1.getNote())
                 .build();
 

@@ -15,9 +15,7 @@ CREATE TABLE IF NOT EXISTS sugars
     DEFAULT
     0,
     time
-    TIMESTAMP
-    DEFAULT
-    CURRENT_TIMESTAMP
+    TIMESTAMP WITH TIME ZONE
     NOT
     NULL,
     note

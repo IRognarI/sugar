@@ -5,7 +5,6 @@ import sugar_bot.sugar.dateTimeFormater.DateTimeFormat;
 import sugar_bot.sugar.dto.SugarDto;
 import sugar_bot.sugar.model.Sugar;
 
-import java.time.LocalDate;
 import java.util.Optional;
 
 @UtilityClass
@@ -23,11 +22,7 @@ public class SugarMapper {
                 sugarDto.setLastDoseOfInsulin(sugarStory.get().getDoseOfInsulin());
             }
 
-            int day = sugarStory.get().getTime().getDayOfMonth();
-            int month = sugarStory.get().getTime().getMonthValue();
-            int year = sugarStory.get().getTime().getYear();
-
-            sugarDto.setLastDate(DateTimeFormat.dateToString(LocalDate.of(year, month, day)));
+            sugarDto.setLastDate(DateTimeFormat.dateToString(sugarStory.get().getTime()));
         }
 
         sugarDto.setSugarId(sugar.getId());

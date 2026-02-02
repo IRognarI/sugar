@@ -2,17 +2,17 @@ package sugar_bot.telegram.loger;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Data
 public class Logger {
     private Long chatId;
     private String message;
-    private LocalDateTime dateTime;
+    private Instant dateTime;
 
     public Logger(Long chatId, String message) {
         this.chatId = chatId;
         this.message = message;
-        this.dateTime = LocalDateTime.now();
+        this.dateTime = Instant.now();
     }
 }

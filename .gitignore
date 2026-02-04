@@ -19,6 +19,7 @@ amplicode.xml
 .env
 /logger.txt
 /amplicode.xml
+application-dev.properties
 
 # Eclipse
 .apt_generated

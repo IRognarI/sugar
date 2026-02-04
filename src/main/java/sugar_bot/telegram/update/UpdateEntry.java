@@ -36,6 +36,7 @@ public class UpdateEntry {
 
     public void begin(Long chatId, String note, Map<Long, UserSt> userStMap, Message message, SugarService sugarService) {
         if (note != null && !note.isEmpty()) {
+
             log.debug("Получили сообщение в begin: {}", note);
 
             UserSt userSt = userStMap.get(chatId);
@@ -46,6 +47,7 @@ public class UpdateEntry {
             }
 
             UpdateSugar updateSugar = userSt.getUpdate();
+            updateSugar.setChatId(chatId);
 
             switch (note) {
                 case "/end":
@@ -74,7 +76,9 @@ public class UpdateEntry {
                     break;
 
                 default:
-                    message.execute(message.sendMessage(chatId, "Не известная команда"));
+                    message.execute(message.sendMessage(chatId, "Не известная команда. Начните сначала"));
+                    userSt.setState(State.START);
+                    userStMap.put(chatId, userSt);
             }
         } else {
             log.info("{} не отправил команду для обновления", chatId);
@@ -86,7 +90,7 @@ public class UpdateEntry {
         if (note != null && !note.isEmpty()) {
 
             try {
-                SugarDto sugarDto = sugarService.getSugarById(Long.parseLong(note.trim()));
+                SugarDto sugarDto = sugarService.getSugarById(Long.parseLong(note.trim()), chatId);
                 log.info("Получили ID= {} для обновления записи", sugarDto.getSugarId());
 
                 UpdateSugar updateSugar = new UpdateSugar();
@@ -94,13 +98,17 @@ public class UpdateEntry {
                 userSt.setUpdate(updateSugar);
                 userSt.getUpdate().setSugarId(sugarDto.getSugarId());
 
-                message.execute(message.sendMessage(chatId, "Нажмите на \"Меню\" и отправьте данные для обновления. После обновления отправьте \"end\""));
+                message.execute(message.sendMessage(chatId, "Нажмите на \"Меню\" и отправьте данные для обновления. После обновления отправьте /end\n\n" +
+                        "Для обновления, используйте команды:\n/sugar - обновить сахар\n/insulin - обновить дозу инсулина\n/note - обновить заметку"));
                 userSt.setState(State.UPDATE_START);
                 userStMap.put(chatId, userSt);
 
             } catch (ValidationException | NotFoundException e) {
                 log.debug("Исключение в sugarUpdate. {}", e.getMessage());
                 message.execute(message.sendMessage(chatId, e.getMessage()));
+
+            } catch (NumberFormatException e) {
+                message.execute(message.sendMessage(chatId, "Укажите просто число, например: 7"));
             }
         }
     }

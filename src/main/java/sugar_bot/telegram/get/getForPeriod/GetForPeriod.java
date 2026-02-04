@@ -11,6 +11,7 @@ import sugar_bot.telegram.state.UserSt;
 import sugar_bot.telegram.util.message.Message;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -96,7 +97,7 @@ public class GetForPeriod {
 
             log.debug("Получили дату начала поиска и конца: {}, {}", start, end);
 
-            List<SugarDto> sugarDtosList = service.getSugarBetweenPeriod(start, end);
+            List<SugarDto> sugarDtosList = service.getSugarBetweenPeriod(start.toInstant(ZoneOffset.UTC), end.toInstant(ZoneOffset.UTC), chatId);
 
             log.debug("Кол-во найденных записей: {}", sugarDtosList.size());
 

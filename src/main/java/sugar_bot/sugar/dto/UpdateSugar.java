@@ -19,6 +19,9 @@ public class UpdateSugar {
     @Positive(message = "ID записи должен быть положительным")
     private Long sugarId;
 
+    @Positive(message = "ChatId должен быть положительным")
+    private Long chatId;
+
     @Length(max = 255, message = "Максимальная длина записи должна быть не более 255 символов")
     private String note;
 

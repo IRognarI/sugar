@@ -130,6 +130,8 @@ public class CommandFilter implements LongPollingSingleThreadUpdateConsumer {
 
                 case "getEntryForPeriod" -> getForPeriod.requestPeriod(chatId, message, userStMap);
 
+                case "checkMyNotify" -> notification.checkMyNotify(chatId, message);
+
                 default -> message.execute(message.sendMessage(chatId, "Не известная команда 🤷‍♂️"));
             }
         }

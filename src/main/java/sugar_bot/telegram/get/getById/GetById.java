@@ -37,7 +37,7 @@ public class GetById {
                 log.info("Пользователь {} хочет получить запись с ID {}", chatId, sugarId);
 
                 try {
-                    SugarDto sugarDto = sugarService.getSugarById(sugarId);
+                    SugarDto sugarDto = sugarService.getSugarById(sugarId, chatId);
 
                     message.execute(message.sendMessage(chatId, message.answerAfterSaved(sugarDto)));
                     userStMap.get(chatId).setState(State.START);

@@ -13,11 +13,11 @@ import sugar_bot.telegram.util.message.Message;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -28,8 +28,8 @@ import java.util.concurrent.TimeUnit;
 public class NotificationImpl implements Notification {
     private final Notify notify;
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-    private final Map<Long, List<LocalTime>> targetTimes = new ConcurrentHashMap<>();
-    private final Map<Long, List<LocalTime>> lastNotify = new ConcurrentHashMap<>();
+    private final Map<Long, Set<LocalTime>> targetTimes = new ConcurrentHashMap<>();
+    private final Map<Long, Set<LocalTime>> lastNotify = new ConcurrentHashMap<>();
     private final Object obj = new Object();
 
     @Override
@@ -113,9 +113,22 @@ public class NotificationImpl implements Notification {
         }
     }
 
-    private List<LocalTime> initList(List<LocalTime> localTimes) {
+    @Override
+    public void checkMyNotify(Long chatId, Message message) {
 
-        return localTimes == null || localTimes.isEmpty() ? new CopyOnWriteArrayList<>() : localTimes;
+        if (!targetTimes.containsKey(chatId) || targetTimes.get(chatId).isEmpty()) {
+
+            message.execute(message.sendMessage(chatId, "Напоминаний нет"));
+
+        } else {
+
+            message.execute(message.sendMessage(chatId, targetTimes.get(chatId).toString()));
+        }
+    }
+
+    private Set<LocalTime> initList(Set<LocalTime> localTimes) {
+
+        return localTimes == null || localTimes.isEmpty() ? new ConcurrentSkipListSet<>() : localTimes;
     }
 
     private void checkTimeAndNotifySend(Long chatId, Message message, Map<Long, UserSt> userStMap) {
@@ -125,11 +138,11 @@ public class NotificationImpl implements Notification {
             UserSt userSt = userStMap.get(chatId);
 
             if (userSt != null && userSt.isGetNotify()) {
-                log.debug("Уведомления разрешены");
+                log.debug("Напоминания разрешены");
 
                 LocalTime timeIsNow = LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
 
-                List<LocalTime> time = targetTimes.get(chatId);
+                Set<LocalTime> time = targetTimes.get(chatId);
 
                 for (LocalTime t : time) {
 

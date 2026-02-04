@@ -150,7 +150,7 @@ public class SugarServiceIntegrationTest {
     public void updateEntry_shouldBeCorrect() {
         Sugar sugar = sugarRepository.save(sugar1.toBuilder().id(null).build());
 
-        UpdateSugar updateSugar = new UpdateSugar(sugar.getId(), sugar.getChatId(),"Заметка для новой записи", 1.5, 12.1);
+        UpdateSugar updateSugar = new UpdateSugar(sugar.getId(), sugar.getChatId(), "Заметка для новой записи", 1.5, 12.1);
 
         SugarDto newSugar = sugarService.updateEntry(updateSugar);
 

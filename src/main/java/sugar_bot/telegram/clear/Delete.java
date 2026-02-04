@@ -9,39 +9,29 @@ import sugar_bot.sugar.interfaces.SugarService;
 import sugar_bot.telegram.enums.State;
 import sugar_bot.telegram.menu.Menu;
 import sugar_bot.telegram.state.UserSt;
-import sugar_bot.telegram.util.admin.Admin;
 import sugar_bot.telegram.util.message.Message;
 
-import java.util.List;
 import java.util.Map;
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
 public class Delete {
-    private final List<Long> targetChatId = List.of(Long.parseLong(System.getenv("my_chat_token")));
 
     public void removeStart(Long chatId, Map<Long, UserSt> userStMap, Message message) {
         UserSt userSt = userStMap.get(chatId);
 
-        boolean thisIsAdmin = targetChatId.contains(chatId);
-        log.info("Для удаления записи обратился admin: {}", thisIsAdmin);
-
-        if (thisIsAdmin) {
-
-            if (userSt == null) {
-                userSt = new UserSt();
-            }
-
-            userSt.setState(State.REMOVE);
-            userStMap.put(chatId, userSt);
-
-            message.execute(message.sendMessage(chatId, "Отправьте ID записи, которую желаете удалить"));
-
-        } else {
-            log.info("Пользователь {} хочет удалить запись", chatId);
-            message.execute(message.sendMessage(chatId, "В доступе отказано. Обратитесь к @" + Admin.getAdmin()));
+        if (userSt == null) {
+            userSt = new UserSt();
         }
+
+        log.info("Пользователь {} хочет удалить запись", chatId);
+
+        userSt.setState(State.REMOVE);
+        userStMap.put(chatId, userSt);
+
+        message.execute(message.sendMessage(chatId, "Отправьте ID записи, которую желаете удалить"));
+
     }
 
     public void removeById(Long chatId, String note, SugarService sugarService, Message message, Map<Long, UserSt> userStMap) {
@@ -52,7 +42,7 @@ public class Delete {
 
                 SugarDto entryExists = null;
                 try {
-                    entryExists = sugarService.getSugarById(sugarId);
+                    entryExists = sugarService.getSugarById(sugarId, chatId);
 
                 } catch (NotFoundException e) {
                     message.execute(message.sendMessage(chatId, e.getMessage()));
@@ -60,7 +50,7 @@ public class Delete {
 
 
                 if (entryExists != null) {
-                    sugarService.removeSugarById(sugarId);
+                    sugarService.removeSugarById(sugarId, chatId);
                     userStMap.get(chatId).setState(State.START);
                     message.execute(message.sendMessage(chatId, "Запись с ID= " + sugarId + " - была удалена"));
                     Menu.sendMenu(chatId, message);

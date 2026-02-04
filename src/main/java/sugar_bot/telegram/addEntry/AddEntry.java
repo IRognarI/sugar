@@ -61,7 +61,6 @@ public class AddEntry {
 
         if (note != null && !note.isEmpty() && !note.equals(".")) {
 
-
             try {
                 double insulin = Double.parseDouble(note.trim());
                 userSt.getNewSugar().setDoseOfInsulin(insulin);

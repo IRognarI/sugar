@@ -15,7 +15,6 @@ import sugar_bot.sugar.exception.ValidationException;
 import sugar_bot.sugar.model.Sugar;
 import sugar_bot.sugar.repository.SugarRepository;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -54,7 +53,7 @@ public class SugarServiceImplTest {
                 .note(newSugar1.getNote())
                 .build();
 
-        sugarFull1 = sugarNotFull1.toBuilder().id(1L).build();
+        sugarFull1 = sugarNotFull1.toBuilder().id(1L).chatId(14234L).build();
 
         sugarNotFull2 = Sugar.builder()
                 .levelSugar(newSugar2.getSugarLevel())
@@ -107,10 +106,11 @@ public class SugarServiceImplTest {
 
     @Test
     public void getSugarById_shouldBeCorrect() {
-        Mockito.when(sugarRepository.getSugarById(Mockito.anyLong())).thenReturn(Optional.of(sugarFull1));
+        Mockito.when(sugarRepository.getSugarByIdAndChatId(Mockito.anyLong(), Mockito.anyLong()))
+                        .thenReturn(Optional.of(sugarFull1));
         Mockito.when(sugarRepository.findByLevelSugar(Mockito.anyDouble(), Mockito.anyLong())).thenReturn(List.of());
 
-        SugarDto sugarDto = sugarService.getSugarById(sugarFull1.getId());
+        SugarDto sugarDto = sugarService.getSugarById(sugarFull1.getId(), sugarFull1.getChatId());
 
         Assertions.assertNotNull(sugarDto);
         Assertions.assertEquals(0, sugarDto.getId());
@@ -121,18 +121,18 @@ public class SugarServiceImplTest {
     @Test
     public void getSugarById_shouldBeValidationException_WhenSugarIdIsNotValid() {
         ValidationException sugarIdIsZero = Assertions.assertThrows(ValidationException.class,
-                () -> sugarService.getSugarById(0L));
+                () -> sugarService.getSugarById(0L, sugarFull1.getChatId()));
         System.out.println(sugarIdIsZero.getMessage());
 
         ValidationException sugarIdIsNull = Assertions.assertThrows(ValidationException.class,
-                () -> sugarService.getSugarById(null));
+                () -> sugarService.getSugarById(null, sugarFull1.getChatId()));
         System.out.println(sugarIdIsNull.getMessage());
     }
 
     @Test
     public void getSugarId_shouldBeNotFoundException_WhenSugarNotFoundById() {
         NotFoundException thrown = Assertions.assertThrows(NotFoundException.class,
-                () -> sugarService.getSugarById(4L));
+                () -> sugarService.getSugarById(4L, sugarFull1.getChatId()));
         System.out.println(thrown.getMessage());
     }
 }

@@ -150,7 +150,7 @@ public class SugarServiceIntegrationTest {
     public void updateEntry_shouldBeCorrect() {
         Sugar sugar = sugarRepository.save(sugar1.toBuilder().id(null).build());
 
-        UpdateSugar updateSugar = new UpdateSugar(sugar.getId(), "Заметка для новой записи", 1.5, 12.1);
+        UpdateSugar updateSugar = new UpdateSugar(sugar.getId(), sugar.getChatId(),"Заметка для новой записи", 1.5, 12.1);
 
         SugarDto newSugar = sugarService.updateEntry(updateSugar);
 
@@ -175,7 +175,7 @@ public class SugarServiceIntegrationTest {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
 
-        UpdateSugar updateSugar = new UpdateSugar(0L, "Заметка для новой записи", 1.5, 12.1);
+        UpdateSugar updateSugar = new UpdateSugar(0L, sugar1.getChatId(), "Заметка для новой записи", 1.5, 12.1);
 
         Set<ConstraintViolation<UpdateSugar>> violations = validator.validate(updateSugar);
 
@@ -191,7 +191,7 @@ public class SugarServiceIntegrationTest {
 
         Sugar sugar = sugarRepository.save(sugar1.toBuilder().id(null).build());
 
-        UpdateSugar updateSugar = new UpdateSugar(sugar.getId(), "Заметка для новой записи".repeat(220), 1.5, 12.1);
+        UpdateSugar updateSugar = new UpdateSugar(sugar.getId(), sugar.getChatId(), "Заметка для новой записи".repeat(220), 1.5, 12.1);
 
         Set<ConstraintViolation<UpdateSugar>> violations = validator.validate(updateSugar);
 
@@ -204,7 +204,7 @@ public class SugarServiceIntegrationTest {
     public void updateSugar_partialUpdate_shouldBeCorrect() {
         Sugar target = sugarRepository.save(sugar1.toBuilder().id(null).build());
 
-        UpdateSugar updateSugar = UpdateSugar.builder().sugarId(target.getId()).doseOfInsulin(1.5).build();
+        UpdateSugar updateSugar = UpdateSugar.builder().sugarId(target.getId()).doseOfInsulin(1.5).chatId(sugar1.getChatId()).build();
 
         SugarDto update = sugarService.updateEntry(updateSugar);
 

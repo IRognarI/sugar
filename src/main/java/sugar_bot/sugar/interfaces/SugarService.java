@@ -4,7 +4,7 @@ import sugar_bot.sugar.dto.NewSugar;
 import sugar_bot.sugar.dto.SugarDto;
 import sugar_bot.sugar.dto.UpdateSugar;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 public interface SugarService {
@@ -12,10 +12,10 @@ public interface SugarService {
 
     SugarDto updateEntry(UpdateSugar updateSugar);
 
-    SugarDto getSugarById(Long sugarId);
+    SugarDto getSugarById(Long sugarId, Long chatId);
 
-    void removeSugarById(Long sugarId);
+    void removeSugarById(Long sugarId, Long chatId);
 
-    List<SugarDto> getSugarBetweenPeriod(LocalDateTime start, LocalDateTime end);
+    List<SugarDto> getSugarBetweenPeriod(Instant start, Instant end, Long chatId);
 
 }

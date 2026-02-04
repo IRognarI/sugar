@@ -12,4 +12,6 @@ public interface Notification {
     void setNotify(Long chatId, String times, Message message, Map<Long, UserSt> userStMap);
 
     void disableNotify(Long chatId, Message message, Map<Long, UserSt> userStMap);
+
+    void checkMyNotify(Long chatId, Message message);
 }

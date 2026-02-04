@@ -16,10 +16,12 @@ import sugar_bot.sugar.interfaces.SugarService;
 import sugar_bot.sugar.maper.SugarMapper;
 import sugar_bot.sugar.model.Sugar;
 import sugar_bot.sugar.repository.SugarRepository;
+import sugar_bot.zoneId.TargetZoneId;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -73,7 +75,7 @@ public class SugarServiceImpl implements SugarService {
         }
         log.info("Полученные данные для обновления: " + updateSugar);
 
-        Sugar sugarOld = sugarRepository.getSugarById(updateSugar.getSugarId())
+        Sugar sugarOld = sugarRepository.getSugarByIdAndChatId(updateSugar.getSugarId(), updateSugar.getChatId())
                 .orElseThrow(() -> new NotFoundException("Запись с ID " + updateSugar.getSugarId() + " - не найдена"));
 
         if (updateSugar.getNote() != null) {
@@ -107,7 +109,7 @@ public class SugarServiceImpl implements SugarService {
 
     @Override
     @Transactional(readOnly = true)
-    public SugarDto getSugarById(Long sugarId) throws ValidationException, NotFoundException {
+    public SugarDto getSugarById(Long sugarId, Long chatId) throws ValidationException, NotFoundException {
 
         if (sugarId == null || sugarId < 1) {
             throw new ValidationException("ID записи не может быть " + sugarId);
@@ -115,7 +117,7 @@ public class SugarServiceImpl implements SugarService {
 
         log.info("Получили ID для поиска записи: {}", sugarId);
 
-        Sugar sugar = sugarRepository.getSugarById(sugarId)
+        Sugar sugar = sugarRepository.getSugarByIdAndChatId(sugarId, chatId)
                 .orElseThrow(() -> new NotFoundException("Запись с ID=" + sugarId + " - не найдена"));
 
         Optional<Sugar> sugarStory = getSugarStory(sugar);
@@ -134,21 +136,24 @@ public class SugarServiceImpl implements SugarService {
     }
 
     @Override
-    public void removeSugarById(Long sugarId) {
+    public void removeSugarById(Long sugarId, Long chatId) {
         if (sugarId != null && sugarId > 0) {
-            sugarRepository.deleteById(sugarId);
+            sugarRepository.deleteByIdAndChatId(sugarId, chatId);
         }
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<SugarDto> getSugarBetweenPeriod(LocalDateTime start, LocalDateTime end) throws ValidationException {
+    public List<SugarDto> getSugarBetweenPeriod(Instant start, Instant end, Long chatId) throws ValidationException {
 
-        periodForSearchValidate(start, end);
+        LocalDateTime localStart = LocalDateTime.ofInstant(start, TargetZoneId.getZoneId());
+        LocalDateTime localEnd = LocalDateTime.ofInstant(end, TargetZoneId.getZoneId());
 
-        log.info("Получили даты для поиска записей.\nНачало поиска: {}\nКонец поиска: {}", start, end);
+        periodForSearchValidate(localStart, localEnd);
 
-        List<Sugar> sugarList = sugarRepository.findByTimeBetween(start, end.plusDays(1));
+        log.info("Получили даты для поиска записей.\nНачало поиска: {}\nКонец поиска: {}", localStart, localEnd);
+
+        List<Sugar> sugarList = sugarRepository.findByTimeBetweenAndChatId(start, end.plus(1, ChronoUnit.DAYS), chatId);
 
         log.info("Кол-во возвращенных записей: {}", sugarList.size());
 
@@ -168,10 +173,10 @@ public class SugarServiceImpl implements SugarService {
             throw new ValidationException("Укажите дату начала поиска записей");
 
         } else if (!start.isBefore(end)) {
-            throw new ValidationException("Дата: " + start.toLocalDate() + " должны быть раньше чем: " + end.toLocalDate());
+            throw new ValidationException("Дата начала поиска должна быть раньше чем дата конца поиска");
 
         } else if (end == null) {
-            end = LocalDateTime.now().plusDays(1);
+            throw new ValidationException("Укажите конечную дату поиска");
         }
     }
 

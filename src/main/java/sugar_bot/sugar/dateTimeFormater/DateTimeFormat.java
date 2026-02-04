@@ -1,6 +1,7 @@
 package sugar_bot.sugar.dateTimeFormater;
 
 import lombok.experimental.UtilityClass;
+import sugar_bot.zoneId.TargetZoneId;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -11,7 +12,7 @@ import java.time.format.DateTimeFormatter;
 
 @UtilityClass
 public class DateTimeFormat {
-    private static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
+    private static final ZoneId zoneId = TargetZoneId.getZoneId();
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");

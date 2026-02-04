@@ -9,8 +9,11 @@ import sugar_bot.telegram.enums.State;
 import sugar_bot.telegram.menu.Menu;
 import sugar_bot.telegram.state.UserSt;
 import sugar_bot.telegram.util.message.Message;
+import sugar_bot.zoneId.TargetZoneId;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
@@ -71,7 +74,7 @@ public class NotificationImpl implements Notification {
 
                     text = "Напоминания сохранены";
 
-                    message.execute(message.sendMessage(chatId, text + "\n" + targetTimes.get(chatId) + "\n"));
+                    message.execute(message.sendMessage(chatId, text + "\n" + targetTimes.get(chatId).toString() + "\n"));
                     Menu.sendMenu(chatId, message);
                 }
 
@@ -140,13 +143,13 @@ public class NotificationImpl implements Notification {
             if (userSt != null && userSt.isGetNotify()) {
                 log.debug("Напоминания разрешены");
 
-                LocalTime timeIsNow = LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
+                ZonedDateTime timeIsNow = ZonedDateTime.of(LocalDateTime.now(), TargetZoneId.getZoneId());
 
                 Set<LocalTime> time = targetTimes.get(chatId);
 
                 for (LocalTime t : time) {
 
-                    if (Objects.equals(timeIsNow, t)) {
+                    if (Objects.equals(timeIsNow.toLocalTime().truncatedTo(ChronoUnit.MINUTES), t)) {
 
                         if (!lastNotify.get(chatId).contains(t)) {
 

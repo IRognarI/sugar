@@ -107,7 +107,7 @@ public class SugarServiceImplTest {
     @Test
     public void getSugarById_shouldBeCorrect() {
         Mockito.when(sugarRepository.getSugarByIdAndChatId(Mockito.anyLong(), Mockito.anyLong()))
-                        .thenReturn(Optional.of(sugarFull1));
+                .thenReturn(Optional.of(sugarFull1));
         Mockito.when(sugarRepository.findByLevelSugar(Mockito.anyDouble(), Mockito.anyLong())).thenReturn(List.of());
 
         SugarDto sugarDto = sugarService.getSugarById(sugarFull1.getId(), sugarFull1.getChatId());

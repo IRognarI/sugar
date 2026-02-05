@@ -34,7 +34,7 @@ public class UpdateEntry {
         message.execute(message.sendMessage(chatId, "Отправьте ID записи для обновления"));
     }
 
-    public void begin(Long chatId, String note, Map<Long, UserSt> userStMap, Message message, SugarService sugarService) {
+    public void begin(Long chatId, String note, Map<Long, UserSt> userStMap, Message message, Menu menu, SugarService sugarService) {
         if (note != null && !note.isEmpty()) {
 
             log.debug("Получили сообщение в begin: {}", note);
@@ -54,7 +54,7 @@ public class UpdateEntry {
                     SugarDto sugarDto = sugarService.updateEntry(updateSugar);
                     message.execute(message.sendMessage(chatId, String.format("Обновленная запись:%n%n%s", message.answerAfterSaved(sugarDto))));
                     userStMap.get(chatId).setState(State.START);
-                    Menu.sendMenu(chatId, message);
+                    menu.sendMenu(chatId, message);
                     break;
 
                 case "/sugar":

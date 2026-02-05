@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
@@ -42,12 +41,7 @@ public class DateTimeFormat {
     }
 
     public LocalTime parseTime(String time) {
-        LocalTime localTime = LocalTime.parse(time, TIME_FORMATTER);
 
-        LocalDateTime dateTime = LocalDateTime.of(LocalDate.now(), localTime);
-
-        ZonedDateTime zonedDateTime = ZonedDateTime.of(dateTime, zoneId);
-
-        return zonedDateTime.toLocalTime().truncatedTo(ChronoUnit.MINUTES);
+        return LocalTime.parse(time, TIME_FORMATTER).truncatedTo(ChronoUnit.MINUTES);
     }
 }

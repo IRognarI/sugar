@@ -74,7 +74,7 @@ public class NotificationImpl implements Notification {
 
                 } else {
 
-                    text = "Напоминания сохранены";
+                    text = "Напоминания сохранены\n*Часовой пояс: МСК";
 
                     message.execute(message.sendMessage(chatId, text + "\n" + targetTimes.get(chatId).toString() + "\n"));
                     menu.sendMenu(chatId, message);

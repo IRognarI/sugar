@@ -34,7 +34,7 @@ public class Delete {
 
     }
 
-    public void removeById(Long chatId, String note, SugarService sugarService, Message message, Map<Long, UserSt> userStMap) {
+    public void removeById(Long chatId, String note, SugarService sugarService, Message message, Menu menu, Map<Long, UserSt> userStMap) {
         if (note != null && !note.isEmpty()) {
             try {
                 Long sugarId = Long.parseLong(note.trim());
@@ -53,7 +53,7 @@ public class Delete {
                     sugarService.removeSugarById(sugarId, chatId);
                     userStMap.get(chatId).setState(State.START);
                     message.execute(message.sendMessage(chatId, "Запись с ID= " + sugarId + " - была удалена"));
-                    Menu.sendMenu(chatId, message);
+                    menu.sendMenu(chatId, message);
                 }
 
             } catch (NumberFormatException e) {

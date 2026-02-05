@@ -29,7 +29,7 @@ public class GetById {
         message.execute(message.sendMessage(chatId, "Отправьте ID записи"));
     }
 
-    public void getSugarById(Long chatId, String note, SugarService sugarService, Message message, Map<Long, UserSt> userStMap) {
+    public void getSugarById(Long chatId, String note, SugarService sugarService, Message message, Menu menu, Map<Long, UserSt> userStMap) {
         if (note != null && !note.isEmpty()) {
 
             try {
@@ -41,7 +41,7 @@ public class GetById {
 
                     message.execute(message.sendMessage(chatId, message.answerAfterSaved(sugarDto)));
                     userStMap.get(chatId).setState(State.START);
-                    Menu.sendMenu(chatId, message);
+                    menu.sendMenu(chatId, message);
                 } catch (ValidationException | NotFoundException e) {
                     message.execute(message.sendMessage(chatId, e.getMessage()));
                 }

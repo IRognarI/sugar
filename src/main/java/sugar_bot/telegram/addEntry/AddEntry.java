@@ -85,7 +85,7 @@ public class AddEntry {
         }
     }
 
-    public void handleWriteNote(Long chatId, String note, Map<Long, UserSt> userStMap, Message message, SugarService sugarService) {
+    public void handleWriteNote(Long chatId, String note, Map<Long, UserSt> userStMap, Message message, Menu menu, SugarService sugarService) {
         UserSt userSt = userStMap.get(chatId);
 
         if (note != null && !note.isEmpty() && !note.equals(".")) {
@@ -100,6 +100,6 @@ public class AddEntry {
         message.execute(message.sendMessage(chatId, message.answerAfterSaved(sugarDto)));
 
         userStMap.get(chatId).setState(State.START);
-        Menu.sendMenu(chatId, message);
+        menu.sendMenu(chatId, message);
     }
 }

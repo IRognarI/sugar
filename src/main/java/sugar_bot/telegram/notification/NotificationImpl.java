@@ -11,6 +11,8 @@ import sugar_bot.telegram.state.UserSt;
 import sugar_bot.telegram.util.message.Message;
 import sugar_bot.zoneId.TargetZoneId;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -57,7 +59,7 @@ public class NotificationImpl implements Notification {
     }
 
     @Override
-    public void setNotify(Long chatId, String times, Message message, Map<Long, UserSt> userStMap) {
+    public void setNotify(Long chatId, String times, Message message, Menu menu, Map<Long, UserSt> userStMap) {
 
         String text;
         if (!Objects.isNull(times)) {
@@ -75,7 +77,7 @@ public class NotificationImpl implements Notification {
                     text = "Напоминания сохранены";
 
                     message.execute(message.sendMessage(chatId, text + "\n" + targetTimes.get(chatId).toString() + "\n"));
-                    Menu.sendMenu(chatId, message);
+                    menu.sendMenu(chatId, message);
                 }
 
                 executor.scheduleAtFixedRate(() -> checkTimeAndNotifySend(chatId, message, userStMap), 0, 1, TimeUnit.MINUTES);
@@ -143,18 +145,32 @@ public class NotificationImpl implements Notification {
             if (userSt != null && userSt.isGetNotify()) {
                 log.debug("Напоминания разрешены");
 
-                ZonedDateTime timeIsNow = ZonedDateTime.of(LocalDateTime.now(), TargetZoneId.getZoneId());
+                Instant timeIsNow = Instant.now();
+
+                ZonedDateTime zoneTime = ZonedDateTime.ofInstant(timeIsNow, TargetZoneId.getZoneId());
+                log.debug("Сейчас время: {}", zoneTime.toLocalTime().truncatedTo(ChronoUnit.MINUTES));
 
                 Set<LocalTime> time = targetTimes.get(chatId);
 
                 for (LocalTime t : time) {
 
-                    if (Objects.equals(timeIsNow.toLocalTime().truncatedTo(ChronoUnit.MINUTES), t)) {
+                    LocalDateTime userTime = LocalDateTime.of(LocalDate.now(), t);
 
-                        if (!lastNotify.get(chatId).contains(t)) {
+                    ZonedDateTime zoneUserTime = ZonedDateTime.of(userTime, TargetZoneId.getZoneId());
 
-                            message.execute(message.sendMessage(chatId, "Время: " + t + "\nВнесите запись"));
-                            lastNotify.get(chatId).add(t);
+                    boolean timeIsSend = zoneTime.toLocalTime().truncatedTo(ChronoUnit.MINUTES)
+                            .equals(zoneUserTime.toLocalTime().truncatedTo(ChronoUnit.MINUTES));
+
+                    log.debug("zoneTime ({}) и zoneUserTime ({}) равны: {}",
+                            zoneTime.toLocalTime().truncatedTo(ChronoUnit.MINUTES),
+                            zoneUserTime.toLocalTime().truncatedTo(ChronoUnit.MINUTES), timeIsSend);
+
+                    if (timeIsSend) {
+
+                        if (!lastNotify.get(chatId).contains(zoneUserTime.toLocalTime().truncatedTo(ChronoUnit.MINUTES))) {
+
+                            message.execute(message.sendMessage(chatId, "Время: " + zoneUserTime.toLocalTime().truncatedTo(ChronoUnit.MINUTES) + "\nВнесите запись"));
+                            lastNotify.get(chatId).add(zoneUserTime.toLocalTime().truncatedTo(ChronoUnit.MINUTES));
 
                             log.debug("Отправили сообщение пользователю: {}", chatId);
                             break;

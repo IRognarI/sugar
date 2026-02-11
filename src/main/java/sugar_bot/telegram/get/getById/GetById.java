@@ -9,7 +9,7 @@ import sugar_bot.sugar.exception.ValidationException;
 import sugar_bot.sugar.interfaces.SugarService;
 import sugar_bot.telegram.enums.State;
 import sugar_bot.telegram.menu.Menu;
-import sugar_bot.telegram.state.UserSt;
+import sugar_bot.telegram.userCheck.UserCheck;
 import sugar_bot.telegram.util.message.Message;
 
 import java.util.Map;
@@ -18,18 +18,18 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 public class GetById {
-    public void getBySugarIdStart(Long chatId, Map<Long, UserSt> userStMap, Message message) {
-        UserSt userSt = userStMap.get(chatId);
+    public void getBySugarIdStart(Long chatId, Map<Long, UserCheck> userStMap, Message message) {
+        UserCheck userCheck = userStMap.get(chatId);
 
-        if (userSt == null) {
-            userSt = new UserSt();
+        if (userCheck == null) {
+            userCheck = new UserCheck();
         }
-        userSt.setState(State.GET_SUGAR_BY_ID);
-        userStMap.put(chatId, userSt);
+        userCheck.setState(State.GET_SUGAR_BY_ID);
+        userStMap.put(chatId, userCheck);
         message.execute(message.sendMessage(chatId, "Отправьте ID записи"));
     }
 
-    public void getSugarById(Long chatId, String note, SugarService sugarService, Message message, Menu menu, Map<Long, UserSt> userStMap) {
+    public void getSugarById(Long chatId, String note, SugarService sugarService, Message message, Menu menu, Map<Long, UserCheck> userStMap) {
         if (note != null && !note.isEmpty()) {
 
             try {

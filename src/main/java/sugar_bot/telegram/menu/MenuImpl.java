@@ -56,6 +56,11 @@ public class MenuImpl implements Menu {
                 .callbackData("getEntryForPeriod")
                 .build();
 
+        InlineKeyboardButton button9 = InlineKeyboardButton.builder()
+                .text("Начать с начала")
+                .callbackData("atFirst")
+                .build();
+
         List<InlineKeyboardRow> keyboards = List.of(
                 new InlineKeyboardRow(button1),
                 new InlineKeyboardRow(button2),
@@ -64,7 +69,8 @@ public class MenuImpl implements Menu {
                 new InlineKeyboardRow(button5),
                 new InlineKeyboardRow(button6),
                 new InlineKeyboardRow(button7),
-                new InlineKeyboardRow(button8)
+                new InlineKeyboardRow(button8),
+                new InlineKeyboardRow(button9)
         );
 
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(keyboards);

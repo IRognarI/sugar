@@ -7,7 +7,7 @@ import sugar_bot.sugar.dto.SugarDto;
 import sugar_bot.sugar.exception.ValidationException;
 import sugar_bot.sugar.interfaces.SugarService;
 import sugar_bot.telegram.enums.State;
-import sugar_bot.telegram.state.UserSt;
+import sugar_bot.telegram.userCheck.UserCheck;
 import sugar_bot.telegram.util.message.Message;
 
 import java.time.LocalDateTime;
@@ -30,22 +30,22 @@ public class GetForPeriod {
         this.service = service;
     }
 
-    public void requestPeriod(Long chatId, Message message, Map<Long, UserSt> userStMap) {
+    public void requestPeriod(Long chatId, Message message, Map<Long, UserCheck> userStMap) {
 
-        UserSt userSt = userStMap.get(chatId);
+        UserCheck userCheck = userStMap.get(chatId);
 
-        if (userSt == null) {
-            userSt = new UserSt();
+        if (userCheck == null) {
+            userCheck = new UserCheck();
         }
 
-        userSt.setState(State.WAITING_FOR_DATES);
+        userCheck.setState(State.WAITING_FOR_DATES);
 
-        userStMap.put(chatId, userSt);
+        userStMap.put(chatId, userCheck);
 
         message.execute(message.sendMessage(chatId, sendInstruction()));
     }
 
-    public void returnEntryList(Long chatId, String val, Message message, Map<Long, UserSt> userStMap) {
+    public void returnEntryList(Long chatId, String val, Message message, Map<Long, UserCheck> userStMap) {
         log.debug("Готовимся отдать список");
 
         try {

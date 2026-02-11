@@ -4,5 +4,5 @@ import sugar_bot.telegram.util.message.Message;
 
 public interface Menu {
 
-    public void sendMenu(Long chatId, Message message);
+    void sendMenu(Long chatId, Message message);
 }

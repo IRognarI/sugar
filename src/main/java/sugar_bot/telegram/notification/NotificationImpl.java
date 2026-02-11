@@ -7,7 +7,7 @@ import sugar_bot.sugar.dateTimeFormater.DateTimeFormat;
 import sugar_bot.sugar.notify.Notify;
 import sugar_bot.telegram.enums.State;
 import sugar_bot.telegram.menu.Menu;
-import sugar_bot.telegram.state.UserSt;
+import sugar_bot.telegram.userCheck.UserCheck;
 import sugar_bot.telegram.util.message.Message;
 import sugar_bot.zoneId.TargetZoneId;
 
@@ -38,15 +38,15 @@ public class NotificationImpl implements Notification {
     private final Object obj = new Object();
 
     @Override
-    public void sendNotify(Long chatId, Message message, Map<Long, UserSt> userStMap) {
+    public void sendNotify(Long chatId, Message message, Map<Long, UserCheck> userStMap) {
 
         if (notify.chatIdExists(chatId)) {
 
-            UserSt userSt = new UserSt();
-            userSt.setGetNotify(true);
+            UserCheck userCheck = new UserCheck();
+            userCheck.setGetNotify(true);
 
-            userSt.setState(State.WAIT_TIME_FOR_NOTIFY);
-            userStMap.put(chatId, userSt);
+            userCheck.setState(State.WAIT_TIME_FOR_NOTIFY);
+            userStMap.put(chatId, userCheck);
             targetTimes.put(chatId, initList(targetTimes.get(chatId)));
             lastNotify.put(chatId, initList(lastNotify.get(chatId)));
 
@@ -59,7 +59,7 @@ public class NotificationImpl implements Notification {
     }
 
     @Override
-    public void setNotify(Long chatId, String times, Message message, Menu menu, Map<Long, UserSt> userStMap) {
+    public void setNotify(Long chatId, String times, Message message, Menu menu, Map<Long, UserCheck> userStMap) {
 
         String text;
         if (!Objects.isNull(times)) {
@@ -102,14 +102,14 @@ public class NotificationImpl implements Notification {
     }
 
     @Override
-    public void disableNotify(Long chatId, Message message, Map<Long, UserSt> userStMap) {
-        UserSt userSt = userStMap.get(chatId);
+    public void disableNotify(Long chatId, Message message, Map<Long, UserCheck> userStMap) {
+        UserCheck userCheck = userStMap.get(chatId);
 
-        if (userSt != null && userSt.isGetNotify()) {
+        if (userCheck != null && userCheck.isGetNotify()) {
 
-            userSt.setGetNotify(false);
+            userCheck.setGetNotify(false);
             targetTimes.remove(chatId);
-            userStMap.put(chatId, userSt);
+            userStMap.put(chatId, userCheck);
 
             message.execute(message.sendMessage(chatId, "Напоминания отключены"));
 
@@ -136,19 +136,19 @@ public class NotificationImpl implements Notification {
         return localTimes == null || localTimes.isEmpty() ? new ConcurrentSkipListSet<>() : localTimes;
     }
 
-    private void checkTimeAndNotifySend(Long chatId, Message message, Map<Long, UserSt> userStMap) {
+    private void checkTimeAndNotifySend(Long chatId, Message message, Map<Long, UserCheck> userStMap) {
 
         synchronized (obj) {
 
-            UserSt userSt = userStMap.get(chatId);
+            UserCheck userCheck = userStMap.get(chatId);
 
-            if (userSt != null && userSt.isGetNotify()) {
+            if (userCheck != null && userCheck.isGetNotify()) {
                 log.debug("Напоминания разрешены");
 
                 Instant timeIsNow = Instant.now();
 
-                ZonedDateTime zoneTime = ZonedDateTime.ofInstant(timeIsNow, TargetZoneId.getZoneId());
-                log.debug("Сейчас время: {}", zoneTime.toLocalTime().truncatedTo(ChronoUnit.MINUTES));
+                ZonedDateTime zoneTime = instantToZoneDateTime(timeIsNow);
+                log.debug("Сейчас время: {}", zoneDateTimeToLocalTime(zoneTime));
 
                 Set<LocalTime> time = targetTimes.get(chatId);
 
@@ -158,8 +158,7 @@ public class NotificationImpl implements Notification {
 
                     ZonedDateTime zoneUserTime = ZonedDateTime.of(userTime, TargetZoneId.getZoneId());
 
-                    boolean timeIsSend = zoneTime.toLocalTime().truncatedTo(ChronoUnit.MINUTES)
-                            .equals(zoneUserTime.toLocalTime().truncatedTo(ChronoUnit.MINUTES));
+                    boolean timeIsSend = nowEqualsNotifyTime(zoneTime, zoneUserTime);
 
                     log.debug("zoneTime ({}) и zoneUserTime ({}) равны: {}",
                             zoneTime.toLocalTime().truncatedTo(ChronoUnit.MINUTES),
@@ -167,10 +166,10 @@ public class NotificationImpl implements Notification {
 
                     if (timeIsSend) {
 
-                        if (!lastNotify.get(chatId).contains(zoneUserTime.toLocalTime().truncatedTo(ChronoUnit.MINUTES))) {
+                        if (!lastNotify.get(chatId).contains(zoneDateTimeToLocalTime(zoneUserTime))) {
 
-                            message.execute(message.sendMessage(chatId, "Время: " + zoneUserTime.toLocalTime().truncatedTo(ChronoUnit.MINUTES) + "\nВнесите запись"));
-                            lastNotify.get(chatId).add(zoneUserTime.toLocalTime().truncatedTo(ChronoUnit.MINUTES));
+                            message.execute(message.sendMessage(chatId, "Время: " + zoneDateTimeToLocalTime(zoneUserTime) + "\nВнесите запись"));
+                            lastNotify.get(chatId).add(zoneDateTimeToLocalTime(zoneUserTime));
 
                             log.debug("Отправили сообщение пользователю: {}", chatId);
                             break;
@@ -178,9 +177,21 @@ public class NotificationImpl implements Notification {
                     }
                 }
 
-                executor.scheduleAtFixedRate(() -> lastNotify.get(chatId).clear(), 1, 1, TimeUnit.HOURS);
+                executor.scheduleAtFixedRate(() -> lastNotify.get(chatId).clear(), 0, 1, TimeUnit.HOURS);
             }
         }
+    }
+
+    private ZonedDateTime instantToZoneDateTime(Instant instant) {
+        return ZonedDateTime.ofInstant(instant, TargetZoneId.getZoneId());
+    }
+
+    private LocalTime zoneDateTimeToLocalTime(ZonedDateTime zonedDateTime) {
+        return zonedDateTime.toLocalTime().truncatedTo(ChronoUnit.MINUTES);
+    }
+
+    private boolean nowEqualsNotifyTime(ZonedDateTime now, ZonedDateTime target) {
+        return now.toLocalTime().truncatedTo(ChronoUnit.MINUTES).equals(target.toLocalTime().truncatedTo(ChronoUnit.MINUTES));
     }
 
     private String sendInstruction() {

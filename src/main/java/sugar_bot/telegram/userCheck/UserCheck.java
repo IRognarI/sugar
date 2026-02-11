@@ -1,4 +1,4 @@
-package sugar_bot.telegram.state;
+package sugar_bot.telegram.userCheck;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +10,7 @@ import sugar_bot.telegram.enums.State;
 @NoArgsConstructor
 @Getter
 @Setter
-public class UserSt {
+public class UserCheck {
     private State state;
     private boolean getNotify = false;
     private NewSugar newSugar;

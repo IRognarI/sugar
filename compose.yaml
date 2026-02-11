@@ -38,8 +38,6 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
-      my_chat_token: ${my_chat_token}
-      LOGGING_LEVEL_SUGAR: ${LOGGING_LEVEL_SUGAR}
       ADMIN: ${ADMIN}
 
     depends_on:

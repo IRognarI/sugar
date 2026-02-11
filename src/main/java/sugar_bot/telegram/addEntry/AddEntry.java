@@ -8,7 +8,7 @@ import sugar_bot.sugar.dto.SugarDto;
 import sugar_bot.sugar.interfaces.SugarService;
 import sugar_bot.telegram.enums.State;
 import sugar_bot.telegram.menu.Menu;
-import sugar_bot.telegram.state.UserSt;
+import sugar_bot.telegram.userCheck.UserCheck;
 import sugar_bot.telegram.util.message.Message;
 
 import java.util.Map;
@@ -17,34 +17,34 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 public class AddEntry {
-    public void start(Long chatId, Message message, Map<Long, UserSt> userStMap) {
-        UserSt userSt = new UserSt();
+    public void start(Long chatId, Message message, Map<Long, UserCheck> userStMap) {
+        UserCheck userCheck = new UserCheck();
         NewSugar newSugar = new NewSugar();
-        userSt.setNewSugar(newSugar);
-        userSt.getNewSugar().setChatId(chatId);
+        userCheck.setNewSugar(newSugar);
+        userCheck.getNewSugar().setChatId(chatId);
 
         message.execute(message.sendMessage(chatId, "Введите сахар"));
 
-        userSt.setState(State.SUGAR);
+        userCheck.setState(State.SUGAR);
 
-        userStMap.put(chatId, userSt);
+        userStMap.put(chatId, userCheck);
     }
 
-    public void handleWriteSugar(Long chatId, String note, Map<Long, UserSt> userStMap, Message message) {
-        UserSt userSt = userStMap.get(chatId);
+    public void handleWriteSugar(Long chatId, String note, Map<Long, UserCheck> userStMap, Message message) {
+        UserCheck userCheck = userStMap.get(chatId);
 
         if (note != null && !note.isEmpty()) {
 
             try {
                 double sugarLevel = Double.parseDouble(note.trim());
-                userSt.getNewSugar().setSugarLevel(sugarLevel);
-                log.info("ChatId в userSt.getNewSugar() == {}", userSt.getNewSugar().getChatId());
-                log.debug("Записали сахар в handleWriteSugar: {}", userSt.getNewSugar().getSugarLevel());
+                userCheck.getNewSugar().setSugarLevel(sugarLevel);
+                log.info("ChatId в userSt.getNewSugar() == {}", userCheck.getNewSugar().getChatId());
+                log.debug("Записали сахар в handleWriteSugar: {}", userCheck.getNewSugar().getSugarLevel());
 
                 message.execute(message.sendMessage(chatId, "Укажите дозу инсулина 👇 Если указывать не нужно, отправьте точку"));
-                userSt.setState(State.INSULIN);
+                userCheck.setState(State.INSULIN);
 
-                userStMap.put(chatId, userSt);
+                userStMap.put(chatId, userCheck);
             } catch (NumberFormatException e) {
                 log.debug("Выброшено исключение NumberFormatException в handleWriteSugar");
                 message.execute(message.sendMessage(chatId, "Уровень сахара указывается через точку. Пример: 9.2"));
@@ -56,50 +56,50 @@ public class AddEntry {
         }
     }
 
-    public void handleWriteInsulin(Long chatId, String note, Map<Long, UserSt> userStMap, Message message) {
-        UserSt userSt = userStMap.get(chatId);
+    public void handleWriteInsulin(Long chatId, String note, Map<Long, UserCheck> userStMap, Message message) {
+        UserCheck userCheck = userStMap.get(chatId);
 
         if (note != null && !note.isEmpty() && !note.equals(".")) {
 
             try {
                 double insulin = Double.parseDouble(note.trim());
-                userSt.getNewSugar().setDoseOfInsulin(insulin);
-                log.debug("Записали инсулин в handleWriteInsulin: {}", userSt.getNewSugar().getDoseOfInsulin());
+                userCheck.getNewSugar().setDoseOfInsulin(insulin);
+                log.debug("Записали инсулин в handleWriteInsulin: {}", userCheck.getNewSugar().getDoseOfInsulin());
 
                 message.execute(message.sendMessage(chatId, "Можно добавить заметку 📝. Если не нужна введите точку"));
-                userSt.setState(State.NOTE);
+                userCheck.setState(State.NOTE);
 
-                userStMap.put(chatId, userSt);
+                userStMap.put(chatId, userCheck);
             } catch (NumberFormatException e) {
                 log.debug("Выброшен NumberFormatException в handleWriteInsulin");
                 message.execute(message.sendMessage(chatId, "Инсулин указывается через точку. Пример: 1.5"));
             }
 
         } else {
-            message.execute(message.sendMessage(chatId, "Инсулин остается: " + userSt.getNewSugar().getDoseOfInsulin()));
+            message.execute(message.sendMessage(chatId, "Инсулин остается: " + userCheck.getNewSugar().getDoseOfInsulin()));
 
             message.execute(message.sendMessage(chatId, "Можно добавить заметку 📝. Если не нужна введите точку"));
-            userSt.setState(State.NOTE);
+            userCheck.setState(State.NOTE);
 
-            userStMap.put(chatId, userSt);
+            userStMap.put(chatId, userCheck);
         }
     }
 
-    public void handleWriteNote(Long chatId, String note, Map<Long, UserSt> userStMap, Message message, SugarService sugarService) {
-        UserSt userSt = userStMap.get(chatId);
+    public void handleWriteNote(Long chatId, String note, Map<Long, UserCheck> userStMap, Message message, Menu menu, SugarService sugarService) {
+        UserCheck userCheck = userStMap.get(chatId);
 
         if (note != null && !note.isEmpty() && !note.equals(".")) {
 
-            userSt.getNewSugar().setNote(note.trim());
-            log.debug("Новая заметка {}", userSt.getNewSugar().getNote());
+            userCheck.getNewSugar().setNote(note.trim());
+            log.debug("Новая заметка {}", userCheck.getNewSugar().getNote());
         } else {
-            message.execute(message.sendMessage(chatId, "Заметка остается по умолчанию: " + userSt.getNewSugar().getNote()));
+            message.execute(message.sendMessage(chatId, "Заметка остается по умолчанию: " + userCheck.getNewSugar().getNote()));
         }
 
-        SugarDto sugarDto = sugarService.addEntry(userSt.getNewSugar());
+        SugarDto sugarDto = sugarService.addEntry(userCheck.getNewSugar());
         message.execute(message.sendMessage(chatId, message.answerAfterSaved(sugarDto)));
 
         userStMap.get(chatId).setState(State.START);
-        Menu.sendMenu(chatId, message);
+        menu.sendMenu(chatId, message);
     }
 }

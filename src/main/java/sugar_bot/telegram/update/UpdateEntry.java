@@ -10,7 +10,7 @@ import sugar_bot.sugar.exception.ValidationException;
 import sugar_bot.sugar.interfaces.SugarService;
 import sugar_bot.telegram.enums.State;
 import sugar_bot.telegram.menu.Menu;
-import sugar_bot.telegram.state.UserSt;
+import sugar_bot.telegram.userCheck.UserCheck;
 import sugar_bot.telegram.util.admin.Admin;
 import sugar_bot.telegram.util.message.Message;
 
@@ -20,33 +20,33 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 public class UpdateEntry {
-    public void updateStart(Long chatId, Map<Long, UserSt> userStMap, Message message) {
-        UserSt userSt = userStMap.get(chatId);
+    public void updateStart(Long chatId, Map<Long, UserCheck> userStMap, Message message) {
+        UserCheck userCheck = userStMap.get(chatId);
 
-        if (userSt == null) {
-            userSt = new UserSt();
+        if (userCheck == null) {
+            userCheck = new UserCheck();
         }
 
-        userSt.setState(State.WAIT_ID_FOR_UPDATE);
-        userStMap.put(chatId, userSt);
+        userCheck.setState(State.WAIT_ID_FOR_UPDATE);
+        userStMap.put(chatId, userCheck);
 
         log.info("{} начинает обновление записи", chatId);
         message.execute(message.sendMessage(chatId, "Отправьте ID записи для обновления"));
     }
 
-    public void begin(Long chatId, String note, Map<Long, UserSt> userStMap, Message message, SugarService sugarService) {
+    public void begin(Long chatId, String note, Map<Long, UserCheck> userStMap, Message message, Menu menu, SugarService sugarService) {
         if (note != null && !note.isEmpty()) {
 
             log.debug("Получили сообщение в begin: {}", note);
 
-            UserSt userSt = userStMap.get(chatId);
+            UserCheck userCheck = userStMap.get(chatId);
 
-            if (userSt == null) {
+            if (userCheck == null) {
                 message.execute(message.sendMessage(chatId, "Ошибка обновления. Свяжитесь с @" + Admin.getAdmin()));
                 return;
             }
 
-            UpdateSugar updateSugar = userSt.getUpdate();
+            UpdateSugar updateSugar = userCheck.getUpdate();
             updateSugar.setChatId(chatId);
 
             switch (note) {
@@ -54,31 +54,31 @@ public class UpdateEntry {
                     SugarDto sugarDto = sugarService.updateEntry(updateSugar);
                     message.execute(message.sendMessage(chatId, String.format("Обновленная запись:%n%n%s", message.answerAfterSaved(sugarDto))));
                     userStMap.get(chatId).setState(State.START);
-                    Menu.sendMenu(chatId, message);
+                    menu.sendMenu(chatId, message);
                     break;
 
                 case "/sugar":
                     message.execute(message.sendMessage(chatId, "Укажите сахар"));
-                    userSt.setState(State.WAIT_SUGAR_FOR_UPDATE);
-                    userStMap.put(chatId, userSt);
+                    userCheck.setState(State.WAIT_SUGAR_FOR_UPDATE);
+                    userStMap.put(chatId, userCheck);
                     break;
 
                 case "/insulin":
                     message.execute(message.sendMessage(chatId, "Укажите инсулин"));
-                    userSt.setState(State.WAIT_INSULIN_FOR_UPDATE);
-                    userStMap.put(chatId, userSt);
+                    userCheck.setState(State.WAIT_INSULIN_FOR_UPDATE);
+                    userStMap.put(chatId, userCheck);
                     break;
 
                 case "/note":
                     message.execute(message.sendMessage(chatId, "Укажите заметку"));
-                    userSt.setState(State.WAIT_NOTE_FOR_UPDATE);
-                    userStMap.put(chatId, userSt);
+                    userCheck.setState(State.WAIT_NOTE_FOR_UPDATE);
+                    userStMap.put(chatId, userCheck);
                     break;
 
                 default:
                     message.execute(message.sendMessage(chatId, "Не известная команда. Начните сначала"));
-                    userSt.setState(State.START);
-                    userStMap.put(chatId, userSt);
+                    userCheck.setState(State.START);
+                    userStMap.put(chatId, userCheck);
             }
         } else {
             log.info("{} не отправил команду для обновления", chatId);
@@ -86,7 +86,7 @@ public class UpdateEntry {
         }
     }
 
-    public void sugarUpdate(Long chatId, String note, UserSt userSt, SugarService sugarService, Message message, Map<Long, UserSt> userStMap) {
+    public void sugarUpdate(Long chatId, String note, UserCheck userCheck, SugarService sugarService, Message message, Map<Long, UserCheck> userStMap) {
         if (note != null && !note.isEmpty()) {
 
             try {
@@ -95,13 +95,13 @@ public class UpdateEntry {
 
                 UpdateSugar updateSugar = new UpdateSugar();
 
-                userSt.setUpdate(updateSugar);
-                userSt.getUpdate().setSugarId(sugarDto.getSugarId());
+                userCheck.setUpdate(updateSugar);
+                userCheck.getUpdate().setSugarId(sugarDto.getSugarId());
 
                 message.execute(message.sendMessage(chatId, "Нажмите на \"Меню\" и отправьте данные для обновления. После обновления отправьте /end\n\n" +
                         "Для обновления, используйте команды:\n/sugar - обновить сахар\n/insulin - обновить дозу инсулина\n/note - обновить заметку"));
-                userSt.setState(State.UPDATE_START);
-                userStMap.put(chatId, userSt);
+                userCheck.setState(State.UPDATE_START);
+                userStMap.put(chatId, userCheck);
 
             } catch (ValidationException | NotFoundException e) {
                 log.debug("Исключение в sugarUpdate. {}", e.getMessage());
@@ -113,17 +113,17 @@ public class UpdateEntry {
         }
     }
 
-    public void handleWriteUpdateSugar(Long chatId, String note, Map<Long, UserSt> userStMap, Message message) {
+    public void handleWriteUpdateSugar(Long chatId, String note, Map<Long, UserCheck> userStMap, Message message) {
         if (note != null && !note.isEmpty()) {
 
-            UserSt userSt = userStMap.get(chatId);
-            UpdateSugar updateSugar = userSt.getUpdate();
+            UserCheck userCheck = userStMap.get(chatId);
+            UpdateSugar updateSugar = userCheck.getUpdate();
 
             try {
                 updateSugar.setSugarLevel(Double.parseDouble(note.trim()));
                 message.execute(message.sendMessage(chatId, "Сахар добавлен"));
-                userSt.setState(State.UPDATE_START);
-                userStMap.put(chatId, userSt);
+                userCheck.setState(State.UPDATE_START);
+                userStMap.put(chatId, userCheck);
 
             } catch (NumberFormatException e) {
                 message.execute(message.sendMessage(chatId, "Сахар указывается через точку. Пример: 7.1"));
@@ -133,17 +133,17 @@ public class UpdateEntry {
         }
     }
 
-    public void handleWriteUpdateInsulin(Long chatId, String note, Map<Long, UserSt> userStMap, Message message) {
+    public void handleWriteUpdateInsulin(Long chatId, String note, Map<Long, UserCheck> userStMap, Message message) {
         if (note != null && !note.isEmpty()) {
 
-            UserSt userSt = userStMap.get(chatId);
-            UpdateSugar updateSugar = userSt.getUpdate();
+            UserCheck userCheck = userStMap.get(chatId);
+            UpdateSugar updateSugar = userCheck.getUpdate();
 
             try {
                 updateSugar.setDoseOfInsulin(Double.parseDouble(note.trim()));
                 message.execute(message.sendMessage(chatId, "Инсулин добавлен"));
-                userSt.setState(State.UPDATE_START);
-                userStMap.put(chatId, userSt);
+                userCheck.setState(State.UPDATE_START);
+                userStMap.put(chatId, userCheck);
 
             } catch (NumberFormatException e) {
                 message.execute(message.sendMessage(chatId, "Инсулин указывается через точку. Пример: 1.5"));
@@ -153,15 +153,15 @@ public class UpdateEntry {
         }
     }
 
-    public void handleWriteUpdateNote(Long chatId, String note, Map<Long, UserSt> userStMap, Message message) {
-        UserSt userSt = userStMap.get(chatId);
+    public void handleWriteUpdateNote(Long chatId, String note, Map<Long, UserCheck> userStMap, Message message) {
+        UserCheck userCheck = userStMap.get(chatId);
 
-        if (userSt == null) {
+        if (userCheck == null) {
             message.execute(message.sendMessage(chatId, "Ошибка обновления. Свяжитесь с @" + Admin.getAdmin()));
             return;
         }
 
-        UpdateSugar updateSugar = userSt.getUpdate();
+        UpdateSugar updateSugar = userCheck.getUpdate();
 
         if (note != null && !note.isEmpty()) {
 
@@ -169,7 +169,7 @@ public class UpdateEntry {
             message.execute(message.sendMessage(chatId, "Заметка добавлена"));
         }
 
-        userSt.setState(State.UPDATE_START);
-        userStMap.put(chatId, userSt);
+        userCheck.setState(State.UPDATE_START);
+        userStMap.put(chatId, userCheck);
     }
 }

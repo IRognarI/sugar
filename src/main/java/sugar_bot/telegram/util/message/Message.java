@@ -1,7 +1,9 @@
 package sugar_bot.telegram.util.message;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
@@ -11,10 +13,11 @@ import static java.lang.String.format;
 
 @Slf4j
 @RequiredArgsConstructor
+@Validated
 public class Message {
     private final TelegramClient telegramClient;
 
-    public SendMessage sendMessage(Long chatId, String message) {
+    public SendMessage sendMessage(Long chatId, @NotNull(message = "Сообщение не может быть null") String message) {
         return SendMessage.builder()
                 .chatId(chatId)
                 .text(message)

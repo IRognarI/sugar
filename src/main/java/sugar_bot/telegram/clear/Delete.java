@@ -8,7 +8,7 @@ import sugar_bot.sugar.exception.NotFoundException;
 import sugar_bot.sugar.interfaces.SugarService;
 import sugar_bot.telegram.enums.State;
 import sugar_bot.telegram.menu.Menu;
-import sugar_bot.telegram.state.UserSt;
+import sugar_bot.telegram.userCheck.UserCheck;
 import sugar_bot.telegram.util.message.Message;
 
 import java.util.Map;
@@ -18,23 +18,23 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class Delete {
 
-    public void removeStart(Long chatId, Map<Long, UserSt> userStMap, Message message) {
-        UserSt userSt = userStMap.get(chatId);
+    public void removeStart(Long chatId, Map<Long, UserCheck> userStMap, Message message) {
+        UserCheck userCheck = userStMap.get(chatId);
 
-        if (userSt == null) {
-            userSt = new UserSt();
+        if (userCheck == null) {
+            userCheck = new UserCheck();
         }
 
         log.info("Пользователь {} хочет удалить запись", chatId);
 
-        userSt.setState(State.REMOVE);
-        userStMap.put(chatId, userSt);
+        userCheck.setState(State.REMOVE);
+        userStMap.put(chatId, userCheck);
 
         message.execute(message.sendMessage(chatId, "Отправьте ID записи, которую желаете удалить"));
 
     }
 
-    public void removeById(Long chatId, String note, SugarService sugarService, Message message, Map<Long, UserSt> userStMap) {
+    public void removeById(Long chatId, String note, SugarService sugarService, Message message, Menu menu, Map<Long, UserCheck> userStMap) {
         if (note != null && !note.isEmpty()) {
             try {
                 Long sugarId = Long.parseLong(note.trim());
@@ -53,7 +53,7 @@ public class Delete {
                     sugarService.removeSugarById(sugarId, chatId);
                     userStMap.get(chatId).setState(State.START);
                     message.execute(message.sendMessage(chatId, "Запись с ID= " + sugarId + " - была удалена"));
-                    Menu.sendMenu(chatId, message);
+                    menu.sendMenu(chatId, message);
                 }
 
             } catch (NumberFormatException e) {

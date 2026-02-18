@@ -1,5 +1,3 @@
---DROP TABLE IF EXISTS sugars;
-
 CREATE TABLE IF NOT EXISTS sugars
 (
     id

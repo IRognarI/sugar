@@ -42,7 +42,7 @@ public class GetForPeriod {
 
         userStMap.put(chatId, userCheck);
 
-        message.execute(message.sendMessage(chatId, sendInstruction()));
+        message.sendMessage(chatId, sendInstruction(), null);
     }
 
     public void returnEntryList(Long chatId, String val, Message message, Map<Long, UserCheck> userStMap) {
@@ -69,8 +69,8 @@ public class GetForPeriod {
         } catch (DateTimeParseException e) {
             log.error(e.getMessage());
 
-            message.execute(message.sendMessage(chatId, "Введите верный формат даты: 23.12.2025\nДаты нужно" +
-                    " отправлять по очереди"));
+            message.sendMessage(chatId, "Введите верный формат даты: 23.12.2025\nДаты нужно" +
+                    " отправлять по очереди", null);
         }
 
     }
@@ -103,20 +103,20 @@ public class GetForPeriod {
 
             if (sugarDtosList.isEmpty()) {
 
-                message.execute(message.sendMessage(chatId, "Записи за указанный период не найдены"));
+                message.sendMessage(chatId, "Записи за указанный период не найдены", null);
 
             } else {
 
                 for (SugarDto dto : sugarDtosList) {
 
-                    message.execute(message.sendMessage(chatId, message.answerAfterSaved(dto)));
+                    message.sendMessage(chatId, message.answerAfterSaved(dto), null);
                 }
 
                 log.info("Отправили записи пользователю {}", chatId);
             }
 
         } catch (ValidationException e) {
-            message.execute(message.sendMessage(chatId, e.getMessage()));
+            message.sendMessage(chatId, e.getMessage(), null);
         }
     }
 

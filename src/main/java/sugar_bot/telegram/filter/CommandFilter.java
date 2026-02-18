@@ -87,7 +87,7 @@ public class CommandFilter implements LongPollingSingleThreadUpdateConsumer {
                                 updateEntry.handleWriteUpdateNote(logger.getChatId(), logger.getMessage(), userCheckMap, message);
 
                         case WAIT_TIME_FOR_NOTIFY ->
-                                notification.setNotify(logger.getChatId(), logger.getMessage(), message, menu, userCheckMap);
+                                notification.setNotify(logger.getChatId(), logger.getMessage(), menu);
 
                         case WAITING_FOR_DATES ->
                                 getForPeriod.returnEntryList(logger.getChatId(), logger.getMessage(), message, userCheckMap);
@@ -97,13 +97,14 @@ public class CommandFilter implements LongPollingSingleThreadUpdateConsumer {
                     menu.sendMenu(logger.getChatId(), message);
 
                 } else if (logger.getMessage().equals("/help")) {
-                    message.execute(message.sendMessage(logger.getChatId(), "@".concat(System.getenv("ADMIN"))));
+                    message.sendMessage(logger.getChatId(), "@".concat(System.getenv("ADMIN")), null);
 
                 } else {
-                    message.execute(message.sendMessage(logger.getChatId(), "click 👉 /start"));
+                    message.sendMessage(logger.getChatId(), "click 👉 /start", null);
                 }
+
             } else {
-                message.execute(message.sendMessage(update.getMessage().getChatId(), "Я еще в мастерской 🥲"));
+                message.sendMessage(update.getMessage().getChatId(), "Пока работаю только с текстом 🥲", null);
             }
 
         } else if (update.hasCallbackQuery()) {
@@ -121,17 +122,17 @@ public class CommandFilter implements LongPollingSingleThreadUpdateConsumer {
 
                 case "removeById" -> delete.removeStart(chatId, userCheckMap, message);
 
-                case "createNotify" -> notification.sendNotify(chatId, message, userCheckMap);
+                case "createNotify" -> notification.sendNotify(chatId, userCheckMap);
 
-                case "disableNotify" -> notification.disableNotify(chatId, message, userCheckMap);
+                case "disableNotify" -> notification.disableNotify(chatId, userCheckMap);
 
                 case "getEntryForPeriod" -> getForPeriod.requestPeriod(chatId, message, userCheckMap);
 
-                case "checkMyNotify" -> notification.checkMyNotify(chatId, message);
+                case "checkMyNotify" -> notification.checkMyNotify(chatId);
 
                 case "atFirst" -> atFirst.atFirst(chatId, message, userCheckMap);
 
-                default -> message.execute(message.sendMessage(chatId, "Не известная команда 🤷‍♂️"));
+                default -> message.sendMessage(chatId, "Не известная команда 🤷‍♂️", null);
             }
         }
     }

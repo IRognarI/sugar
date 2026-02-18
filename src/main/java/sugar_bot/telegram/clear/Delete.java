@@ -30,7 +30,7 @@ public class Delete {
         userCheck.setState(State.REMOVE);
         userStMap.put(chatId, userCheck);
 
-        message.execute(message.sendMessage(chatId, "Отправьте ID записи, которую желаете удалить"));
+        message.sendMessage(chatId, "Отправьте ID записи, которую желаете удалить", null);
 
     }
 
@@ -45,20 +45,20 @@ public class Delete {
                     entryExists = sugarService.getSugarById(sugarId, chatId);
 
                 } catch (NotFoundException e) {
-                    message.execute(message.sendMessage(chatId, e.getMessage()));
+                    message.sendMessage(chatId, e.getMessage(), null);
                 }
 
 
                 if (entryExists != null) {
                     sugarService.removeSugarById(sugarId, chatId);
                     userStMap.get(chatId).setState(State.START);
-                    message.execute(message.sendMessage(chatId, "Запись с ID= " + sugarId + " - была удалена"));
+                    message.sendMessage(chatId, "Запись с ID= " + sugarId + " - была удалена", null);
                     menu.sendMenu(chatId, message);
                 }
 
             } catch (NumberFormatException e) {
                 log.debug("Указали не верный формат ID в removeById");
-                message.execute(message.sendMessage(chatId, "Укажите просто число. Пример: 7"));
+                message.sendMessage(chatId, "Укажите просто число. Пример: 7", null);
             }
         }
     }

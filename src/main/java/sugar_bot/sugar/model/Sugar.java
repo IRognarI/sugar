@@ -36,10 +36,11 @@ public class Sugar {
     @Column(name = "chat_id", nullable = false)
     private Long chatId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "level_sugar")
     private double levelSugar;
 
     @Builder.Default
+    @Column(name = "dose_of_insulin")
     private double doseOfInsulin = 0;
 
     @Column(nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")

@@ -1,7 +1,6 @@
 package sugar_bot.telegram.menu;
 
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardRow;
@@ -13,8 +12,6 @@ import java.util.List;
 public class MenuImpl implements Menu {
 
     public void sendMenu(Long chatId, Message message) {
-
-        SendMessage sendMessage = message.sendMessage(chatId, "Вот что я могу:");
 
         InlineKeyboardButton button1 = InlineKeyboardButton.builder()
                 .text("Создать запись")
@@ -75,8 +72,6 @@ public class MenuImpl implements Menu {
 
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(keyboards);
 
-        sendMessage.setReplyMarkup(keyboardMarkup);
-
-        message.execute(sendMessage);
+        message.sendMessage(chatId, "Вот что я могу:", keyboardMarkup);
     }
 }

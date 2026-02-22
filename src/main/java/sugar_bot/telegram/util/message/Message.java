@@ -1,10 +1,12 @@
 package sugar_bot.telegram.util.message;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import sugar_bot.sugar.dto.SugarDto;
@@ -15,16 +17,25 @@ import static java.lang.String.format;
 @RequiredArgsConstructor
 @Validated
 public class Message {
+
+    @Getter
     private final TelegramClient telegramClient;
 
-    public SendMessage sendMessage(Long chatId, @NotNull(message = "Сообщение не может быть null") String message) {
-        return SendMessage.builder()
+    public void sendMessage(Long chatId, @NotNull(message = "Сообщение не может быть null") String message,
+                            InlineKeyboardMarkup keyboardMarkup) {
+        SendMessage mess = SendMessage.builder()
                 .chatId(chatId)
                 .text(message)
                 .build();
+
+        if (keyboardMarkup != null) {
+            mess.setReplyMarkup(keyboardMarkup);
+        }
+
+        execute(mess);
     }
 
-    public void execute(SendMessage message) {
+    private void execute(SendMessage message) {
         try {
             telegramClient.execute(message);
         } catch (TelegramApiException e) {

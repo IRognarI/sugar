@@ -26,7 +26,7 @@ public class GetById {
         }
         userCheck.setState(State.GET_SUGAR_BY_ID);
         userStMap.put(chatId, userCheck);
-        message.execute(message.sendMessage(chatId, "Отправьте ID записи"));
+        message.sendMessage(chatId, "Отправьте ID записи", null);
     }
 
     public void getSugarById(Long chatId, String note, SugarService sugarService, Message message, Menu menu, Map<Long, UserCheck> userStMap) {
@@ -39,20 +39,20 @@ public class GetById {
                 try {
                     SugarDto sugarDto = sugarService.getSugarById(sugarId, chatId);
 
-                    message.execute(message.sendMessage(chatId, message.answerAfterSaved(sugarDto)));
+                    message.sendMessage(chatId, message.answerAfterSaved(sugarDto), null);
                     userStMap.get(chatId).setState(State.START);
                     menu.sendMenu(chatId, message);
                 } catch (ValidationException | NotFoundException e) {
-                    message.execute(message.sendMessage(chatId, e.getMessage()));
+                    message.sendMessage(chatId, e.getMessage(), null);
                 }
 
             } catch (NumberFormatException e) {
                 log.debug("{} отправил не корректный ID записи", chatId);
-                message.execute(message.sendMessage(chatId, "Отправьте просто число. Например: 7"));
+                message.sendMessage(chatId, "Отправьте просто число. Например: 7", null);
             }
         } else {
             log.debug("{} отправил не корректное сообщение: {}", chatId, note);
-            message.execute(message.sendMessage(chatId, "Отправьте ID записи, например: 7"));
+            message.sendMessage(chatId, "Отправьте ID записи, например: 7", null);
         }
     }
 }

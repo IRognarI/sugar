@@ -20,7 +20,7 @@ public class AtFirst {
 
             userCheckMap.put(chatId, userCheck);
 
-            message.execute(message.sendMessage(chatId, "👉 /start"));
+            message.sendMessage(chatId, "👉 /start", null);
         }
     }
 }

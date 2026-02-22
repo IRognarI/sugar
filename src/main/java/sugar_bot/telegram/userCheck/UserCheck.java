@@ -12,7 +12,7 @@ import sugar_bot.telegram.enums.State;
 @Setter
 public class UserCheck {
     private State state;
-    private boolean getNotify = false;
+    //private boolean getNotify = false;
     private NewSugar newSugar;
     private UpdateSugar update;
 }

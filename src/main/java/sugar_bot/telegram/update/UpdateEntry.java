@@ -31,7 +31,7 @@ public class UpdateEntry {
         userStMap.put(chatId, userCheck);
 
         log.info("{} начинает обновление записи", chatId);
-        message.execute(message.sendMessage(chatId, "Отправьте ID записи для обновления"));
+        message.sendMessage(chatId, "Отправьте ID записи для обновления", null);
     }
 
     public void begin(Long chatId, String note, Map<Long, UserCheck> userStMap, Message message, Menu menu, SugarService sugarService) {
@@ -42,7 +42,7 @@ public class UpdateEntry {
             UserCheck userCheck = userStMap.get(chatId);
 
             if (userCheck == null) {
-                message.execute(message.sendMessage(chatId, "Ошибка обновления. Свяжитесь с @" + Admin.getAdmin()));
+                message.sendMessage(chatId, "Ошибка обновления. Свяжитесь с @" + Admin.getAdmin(), null);
                 return;
             }
 
@@ -52,37 +52,37 @@ public class UpdateEntry {
             switch (note) {
                 case "/end":
                     SugarDto sugarDto = sugarService.updateEntry(updateSugar);
-                    message.execute(message.sendMessage(chatId, String.format("Обновленная запись:%n%n%s", message.answerAfterSaved(sugarDto))));
+                    message.sendMessage(chatId, String.format("Обновленная запись:%n%n%s", message.answerAfterSaved(sugarDto)), null);
                     userStMap.get(chatId).setState(State.START);
                     menu.sendMenu(chatId, message);
                     break;
 
                 case "/sugar":
-                    message.execute(message.sendMessage(chatId, "Укажите сахар"));
+                    message.sendMessage(chatId, "Укажите сахар", null);
                     userCheck.setState(State.WAIT_SUGAR_FOR_UPDATE);
                     userStMap.put(chatId, userCheck);
                     break;
 
                 case "/insulin":
-                    message.execute(message.sendMessage(chatId, "Укажите инсулин"));
+                    message.sendMessage(chatId, "Укажите инсулин", null);
                     userCheck.setState(State.WAIT_INSULIN_FOR_UPDATE);
                     userStMap.put(chatId, userCheck);
                     break;
 
                 case "/note":
-                    message.execute(message.sendMessage(chatId, "Укажите заметку"));
+                    message.sendMessage(chatId, "Укажите заметку", null);
                     userCheck.setState(State.WAIT_NOTE_FOR_UPDATE);
                     userStMap.put(chatId, userCheck);
                     break;
 
                 default:
-                    message.execute(message.sendMessage(chatId, "Не известная команда. Начните сначала"));
+                    message.sendMessage(chatId, "Не известная команда. Начните сначала", null);
                     userCheck.setState(State.START);
                     userStMap.put(chatId, userCheck);
             }
         } else {
             log.info("{} не отправил команду для обновления", chatId);
-            message.execute(message.sendMessage(chatId, "Отправьте команду для обновления"));
+            message.sendMessage(chatId, "Отправьте команду для обновления", null);
         }
     }
 
@@ -98,17 +98,21 @@ public class UpdateEntry {
                 userCheck.setUpdate(updateSugar);
                 userCheck.getUpdate().setSugarId(sugarDto.getSugarId());
 
-                message.execute(message.sendMessage(chatId, "Нажмите на \"Меню\" и отправьте данные для обновления. После обновления отправьте /end\n\n" +
-                        "Для обновления, используйте команды:\n/sugar - обновить сахар\n/insulin - обновить дозу инсулина\n/note - обновить заметку"));
+                message.sendMessage(chatId, "Для обновления, используйте команды:\n" +
+                        "/sugar - обновить сахар\n" +
+                        "/insulin - обновить дозу инсулина\n" +
+                        "/note - обновить заметку\n" +
+                        "\nПо завершению обновления отправьте:\n/end", null);
+
                 userCheck.setState(State.UPDATE_START);
                 userStMap.put(chatId, userCheck);
 
             } catch (ValidationException | NotFoundException e) {
                 log.debug("Исключение в sugarUpdate. {}", e.getMessage());
-                message.execute(message.sendMessage(chatId, e.getMessage()));
+                message.sendMessage(chatId, e.getMessage(), null);
 
             } catch (NumberFormatException e) {
-                message.execute(message.sendMessage(chatId, "Укажите просто число, например: 7"));
+                message.sendMessage(chatId, "Укажите просто число, например: 7", null);
             }
         }
     }
@@ -121,15 +125,15 @@ public class UpdateEntry {
 
             try {
                 updateSugar.setSugarLevel(Double.parseDouble(note.trim()));
-                message.execute(message.sendMessage(chatId, "Сахар добавлен"));
+                message.sendMessage(chatId, "Сахар добавлен", null);
                 userCheck.setState(State.UPDATE_START);
                 userStMap.put(chatId, userCheck);
 
             } catch (NumberFormatException e) {
-                message.execute(message.sendMessage(chatId, "Сахар указывается через точку. Пример: 7.1"));
+                message.sendMessage(chatId, "Сахар указывается через точку. Пример: 7.1", null);
             }
         } else {
-            message.execute(message.sendMessage(chatId, "Укажите сахар. Пример: 7.1"));
+            message.sendMessage(chatId, "Укажите сахар. Пример: 7.1", null);
         }
     }
 
@@ -141,15 +145,15 @@ public class UpdateEntry {
 
             try {
                 updateSugar.setDoseOfInsulin(Double.parseDouble(note.trim()));
-                message.execute(message.sendMessage(chatId, "Инсулин добавлен"));
+                message.sendMessage(chatId, "Инсулин добавлен", null);
                 userCheck.setState(State.UPDATE_START);
                 userStMap.put(chatId, userCheck);
 
             } catch (NumberFormatException e) {
-                message.execute(message.sendMessage(chatId, "Инсулин указывается через точку. Пример: 1.5"));
+                message.sendMessage(chatId, "Инсулин указывается через точку. Пример: 1.5", null);
             }
         } else {
-            message.execute(message.sendMessage(chatId, "Укажите инсулин. Пример: 1.5"));
+            message.sendMessage(chatId, "Укажите инсулин. Пример: 1.5", null);
         }
     }
 
@@ -157,7 +161,7 @@ public class UpdateEntry {
         UserCheck userCheck = userStMap.get(chatId);
 
         if (userCheck == null) {
-            message.execute(message.sendMessage(chatId, "Ошибка обновления. Свяжитесь с @" + Admin.getAdmin()));
+            message.sendMessage(chatId, "Ошибка обновления. Свяжитесь с @" + Admin.getAdmin(), null);
             return;
         }
 
@@ -166,7 +170,7 @@ public class UpdateEntry {
         if (note != null && !note.isEmpty()) {
 
             updateSugar.setNote(note.trim());
-            message.execute(message.sendMessage(chatId, "Заметка добавлена"));
+            message.sendMessage(chatId, "Заметка добавлена", null);
         }
 
         userCheck.setState(State.UPDATE_START);

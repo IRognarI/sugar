@@ -2,6 +2,7 @@ package sugar_bot.telegram.notification;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import sugar_bot.sugar.dateTimeFormater.DateTimeFormat;
 import sugar_bot.sugar.notify.Notify;
@@ -11,9 +12,6 @@ import sugar_bot.telegram.userCheck.UserCheck;
 import sugar_bot.telegram.util.message.Message;
 import sugar_bot.zoneId.TargetZoneId;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
@@ -23,43 +21,37 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
 public class NotificationImpl implements Notification {
     private final Notify notify;
-    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private final Message message;
     private final Map<Long, Set<LocalTime>> targetTimes = new ConcurrentHashMap<>();
-    private final Map<Long, Set<LocalTime>> lastNotify = new ConcurrentHashMap<>();
-    private final Object obj = new Object();
+    private final Map<Long, ZonedDateTime> lastNotify = new ConcurrentHashMap<>();
 
     @Override
-    public void sendNotify(Long chatId, Message message, Map<Long, UserCheck> userStMap) {
+    public void sendNotify(Long chatId, Map<Long, UserCheck> userStMap) {
 
         if (notify.chatIdExists(chatId)) {
 
             UserCheck userCheck = new UserCheck();
-            userCheck.setGetNotify(true);
 
             userCheck.setState(State.WAIT_TIME_FOR_NOTIFY);
             userStMap.put(chatId, userCheck);
             targetTimes.put(chatId, initList(targetTimes.get(chatId)));
-            lastNotify.put(chatId, initList(lastNotify.get(chatId)));
 
-            message.execute(message.sendMessage(chatId, sendInstruction()));
+            message.sendMessage(chatId, sendInstruction(), null);
 
         } else {
 
-            message.execute(message.sendMessage(chatId, "Сначала нужно сохранить хотя бы одну запись"));
+            message.sendMessage(chatId, "Сначала нужно сохранить хотя бы одну запись", null);
         }
     }
 
     @Override
-    public void setNotify(Long chatId, String times, Message message, Menu menu, Map<Long, UserCheck> userStMap) {
+    public void setNotify(Long chatId, String times, Menu menu) {
 
         String text;
         if (!Objects.isNull(times)) {
@@ -70,17 +62,15 @@ public class NotificationImpl implements Notification {
 
                     text = "Нужно указать время хотя бы одного напоминания";
 
-                    message.execute(message.sendMessage(chatId, text));
+                    message.sendMessage(chatId, text, null);
 
                 } else {
 
                     text = "Напоминания сохранены\n*Часовой пояс: МСК";
 
-                    message.execute(message.sendMessage(chatId, text + "\n" + targetTimes.get(chatId).toString() + "\n"));
+                    message.sendMessage(chatId, text + "\n" + targetTimes.get(chatId).toString() + "\n", null);
                     menu.sendMenu(chatId, message);
                 }
-
-                executor.scheduleAtFixedRate(() -> checkTimeAndNotifySend(chatId, message, userStMap), 0, 1, TimeUnit.MINUTES);
 
             } else {
 
@@ -91,43 +81,40 @@ public class NotificationImpl implements Notification {
                 } catch (DateTimeParseException e) {
                     log.error(e.getMessage());
 
-                    message.execute(message.sendMessage(chatId, "Время указывается в таком формате 👉 17:12"));
+                    message.sendMessage(chatId, "Время указывается в таком формате 👉 17:12", null);
                 }
             }
 
         } else {
 
-            message.execute(message.sendMessage(chatId, "Следуйте инструкции👇\n\n" + sendInstruction()));
+            message.sendMessage(chatId, "Следуйте инструкции👇\n\n" + sendInstruction(), null);
         }
     }
 
     @Override
-    public void disableNotify(Long chatId, Message message, Map<Long, UserCheck> userStMap) {
-        UserCheck userCheck = userStMap.get(chatId);
+    public void disableNotify(Long chatId, Map<Long, UserCheck> userStMap) {
 
-        if (userCheck != null && userCheck.isGetNotify()) {
+        if (targetTimes.containsKey(chatId)) {
 
-            userCheck.setGetNotify(false);
             targetTimes.remove(chatId);
-            userStMap.put(chatId, userCheck);
 
-            message.execute(message.sendMessage(chatId, "Напоминания отключены"));
+            message.sendMessage(chatId, "Напоминания отключены", null);
 
         } else {
-            message.execute(message.sendMessage(chatId, "Напоминания не были подключены"));
+            message.sendMessage(chatId, "Напоминания не подключены", null);
         }
     }
 
     @Override
-    public void checkMyNotify(Long chatId, Message message) {
+    public void checkMyNotify(Long chatId) {
 
         if (!targetTimes.containsKey(chatId) || targetTimes.get(chatId).isEmpty()) {
 
-            message.execute(message.sendMessage(chatId, "Напоминаний нет"));
+            message.sendMessage(chatId, "Напоминаний нет", null);
 
         } else {
 
-            message.execute(message.sendMessage(chatId, targetTimes.get(chatId).toString()));
+            message.sendMessage(chatId, targetTimes.get(chatId).toString(), null);
         }
     }
 
@@ -136,62 +123,34 @@ public class NotificationImpl implements Notification {
         return localTimes == null || localTimes.isEmpty() ? new ConcurrentSkipListSet<>() : localTimes;
     }
 
-    private void checkTimeAndNotifySend(Long chatId, Message message, Map<Long, UserCheck> userStMap) {
+    @Scheduled(fixedRate = 60000)
+    public void checkTimeAndNotifySendActual() {
+        log.debug("Запущен сервис напоминаний");
 
-        synchronized (obj) {
+        ZonedDateTime localTime = ZonedDateTime.now(TargetZoneId.getZoneId());
+        log.debug("Сейчас время: {}", zoneDateTimeToLocalTime(localTime));
 
-            UserCheck userCheck = userStMap.get(chatId);
+        for (Long key : targetTimes.keySet()) {
 
-            if (userCheck != null && userCheck.isGetNotify()) {
-                log.debug("Напоминания разрешены");
+            if (key != null && targetTimes.get(key).contains(zoneDateTimeToLocalTime(localTime))) {
+                log.debug("Совпало время напоминания с {} у юзера {}", zoneDateTimeToLocalTime(localTime), key);
 
-                Instant timeIsNow = Instant.now();
+                if (lastNotify.get(key) == null || lastNotify.get(key).isBefore(localTime.truncatedTo(ChronoUnit.MINUTES))) {
 
-                ZonedDateTime zoneTime = instantToZoneDateTime(timeIsNow);
-                log.debug("Сейчас время: {}", zoneDateTimeToLocalTime(zoneTime));
+                    message.sendMessage(key, "Время: " + zoneDateTimeToLocalTime(localTime) +
+                            "\nВнесите запись", null);
 
-                Set<LocalTime> time = targetTimes.get(chatId);
+                    lastNotify.put(key, localTime.truncatedTo(ChronoUnit.MINUTES));
+                    log.debug("Для юзера {} добавили время {} в уже отправленные", key, zoneDateTimeToLocalTime(localTime));
 
-                for (LocalTime t : time) {
-
-                    LocalDateTime userTime = LocalDateTime.of(LocalDate.now(), t);
-
-                    ZonedDateTime zoneUserTime = ZonedDateTime.of(userTime, TargetZoneId.getZoneId());
-
-                    boolean timeIsSend = nowEqualsNotifyTime(zoneTime, zoneUserTime);
-
-                    log.debug("zoneTime ({}) и zoneUserTime ({}) равны: {}",
-                            zoneTime.toLocalTime().truncatedTo(ChronoUnit.MINUTES),
-                            zoneUserTime.toLocalTime().truncatedTo(ChronoUnit.MINUTES), timeIsSend);
-
-                    if (timeIsSend) {
-
-                        if (!lastNotify.get(chatId).contains(zoneDateTimeToLocalTime(zoneUserTime))) {
-
-                            message.execute(message.sendMessage(chatId, "Время: " + zoneDateTimeToLocalTime(zoneUserTime) + "\nВнесите запись"));
-                            lastNotify.get(chatId).add(zoneDateTimeToLocalTime(zoneUserTime));
-
-                            log.debug("Отправили сообщение пользователю: {}", chatId);
-                            break;
-                        }
-                    }
+                    log.debug("Отправили сообщение юзеру {}", key);
                 }
-
-                executor.scheduleAtFixedRate(() -> lastNotify.get(chatId).clear(), 0, 1, TimeUnit.HOURS);
             }
         }
     }
 
-    private ZonedDateTime instantToZoneDateTime(Instant instant) {
-        return ZonedDateTime.ofInstant(instant, TargetZoneId.getZoneId());
-    }
-
     private LocalTime zoneDateTimeToLocalTime(ZonedDateTime zonedDateTime) {
         return zonedDateTime.toLocalTime().truncatedTo(ChronoUnit.MINUTES);
-    }
-
-    private boolean nowEqualsNotifyTime(ZonedDateTime now, ZonedDateTime target) {
-        return now.toLocalTime().truncatedTo(ChronoUnit.MINUTES).equals(target.toLocalTime().truncatedTo(ChronoUnit.MINUTES));
     }
 
     private String sendInstruction() {

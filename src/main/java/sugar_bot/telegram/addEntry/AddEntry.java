@@ -23,7 +23,7 @@ public class AddEntry {
         userCheck.setNewSugar(newSugar);
         userCheck.getNewSugar().setChatId(chatId);
 
-        message.execute(message.sendMessage(chatId, "Введите сахар"));
+        message.sendMessage(chatId, "Введите сахар", null);
 
         userCheck.setState(State.SUGAR);
 
@@ -41,18 +41,18 @@ public class AddEntry {
                 log.info("ChatId в userSt.getNewSugar() == {}", userCheck.getNewSugar().getChatId());
                 log.debug("Записали сахар в handleWriteSugar: {}", userCheck.getNewSugar().getSugarLevel());
 
-                message.execute(message.sendMessage(chatId, "Укажите дозу инсулина 👇 Если указывать не нужно, отправьте точку"));
+                message.sendMessage(chatId, "Укажите дозу инсулина 👇 Если указывать не нужно, отправьте точку", null);
                 userCheck.setState(State.INSULIN);
 
                 userStMap.put(chatId, userCheck);
             } catch (NumberFormatException e) {
                 log.debug("Выброшено исключение NumberFormatException в handleWriteSugar");
-                message.execute(message.sendMessage(chatId, "Уровень сахара указывается через точку. Пример: 9.2"));
+                message.sendMessage(chatId, "Уровень сахара указывается через точку. Пример: 9.2", null);
             }
 
         } else {
             log.debug("Не указали уровень сахара");
-            message.execute(message.sendMessage(chatId, "Уровень сахара должен быть указан"));
+            message.sendMessage(chatId, "Уровень сахара должен быть указан", null);
         }
     }
 
@@ -66,19 +66,19 @@ public class AddEntry {
                 userCheck.getNewSugar().setDoseOfInsulin(insulin);
                 log.debug("Записали инсулин в handleWriteInsulin: {}", userCheck.getNewSugar().getDoseOfInsulin());
 
-                message.execute(message.sendMessage(chatId, "Можно добавить заметку 📝. Если не нужна введите точку"));
+                message.sendMessage(chatId, "Можно добавить заметку 📝. Если не нужна введите точку", null);
                 userCheck.setState(State.NOTE);
 
                 userStMap.put(chatId, userCheck);
             } catch (NumberFormatException e) {
                 log.debug("Выброшен NumberFormatException в handleWriteInsulin");
-                message.execute(message.sendMessage(chatId, "Инсулин указывается через точку. Пример: 1.5"));
+                message.sendMessage(chatId, "Инсулин указывается через точку. Пример: 1.5", null);
             }
 
         } else {
-            message.execute(message.sendMessage(chatId, "Инсулин остается: " + userCheck.getNewSugar().getDoseOfInsulin()));
+            message.sendMessage(chatId, "Инсулин остается: " + userCheck.getNewSugar().getDoseOfInsulin(), null);
 
-            message.execute(message.sendMessage(chatId, "Можно добавить заметку 📝. Если не нужна введите точку"));
+            message.sendMessage(chatId, "Можно добавить заметку 📝. Если не нужна введите точку", null);
             userCheck.setState(State.NOTE);
 
             userStMap.put(chatId, userCheck);
@@ -93,11 +93,11 @@ public class AddEntry {
             userCheck.getNewSugar().setNote(note.trim());
             log.debug("Новая заметка {}", userCheck.getNewSugar().getNote());
         } else {
-            message.execute(message.sendMessage(chatId, "Заметка остается по умолчанию: " + userCheck.getNewSugar().getNote()));
+            message.sendMessage(chatId, "Заметка остается по умолчанию: " + userCheck.getNewSugar().getNote(), null);
         }
 
         SugarDto sugarDto = sugarService.addEntry(userCheck.getNewSugar());
-        message.execute(message.sendMessage(chatId, message.answerAfterSaved(sugarDto)));
+        message.sendMessage(chatId, message.answerAfterSaved(sugarDto), null);
 
         userStMap.get(chatId).setState(State.START);
         menu.sendMenu(chatId, message);

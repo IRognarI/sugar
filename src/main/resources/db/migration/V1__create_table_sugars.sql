@@ -1,16 +1,14 @@
---DROP TABLE IF EXISTS sugars;
-
 CREATE TABLE IF NOT EXISTS sugars
 (
     id
     SERIAL
     PRIMARY
     KEY,
-    levelSugar
+    level_sugar
     FLOAT
     NOT
     NULL,
-    doseOfInsulin
+    dose_of_insulin
     FLOAT
     DEFAULT
     0,
@@ -28,6 +26,6 @@ CREATE TABLE IF NOT EXISTS sugars
 )
     );
 
-CREATE INDEX IF NOT EXISTS sugars_levelSugar_idx ON sugars (levelSugar);
-CREATE INDEX IF NOT EXISTS sugars_doseOfInsulin_idx ON sugars (doseOfInsulin);
+CREATE INDEX IF NOT EXISTS sugars_levelSugar_idx ON sugars (level_sugar);
+CREATE INDEX IF NOT EXISTS sugars_doseOfInsulin_idx ON sugars (dose_of_insulin);
 CREATE INDEX IF NOT EXISTS sugars_time_idx ON sugars (time);
